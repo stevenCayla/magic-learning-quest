@@ -11,7 +11,7 @@ export function freshState() {
     streak: 0,
     bestStreak: 0,
     rewards: [],
-    settings: { difficulty: 'auto', clockLevel: 'auto', relaxed: false },
+    settings: { difficulty: 'auto', clockLevel: 'auto', relaxed: false, sound: true },
     stats: { clock: stats(), math: stats() },
     history: [],
   };
@@ -32,13 +32,15 @@ export function restore(raw) {
     if (
       !DIFFICULTIES.includes(data.settings?.difficulty) ||
       !['auto', '0', '1', '2', '3', '4'].includes(String(data.settings?.clockLevel)) ||
-      typeof data.settings?.relaxed !== 'boolean'
+      typeof data.settings?.relaxed !== 'boolean' ||
+      (data.settings.sound !== undefined && typeof data.settings.sound !== 'boolean')
     )
       throw new Error('Invalid settings');
     base.settings = {
       difficulty: data.settings.difficulty,
       clockLevel: String(data.settings.clockLevel),
       relaxed: data.settings.relaxed,
+      sound: data.settings.sound ?? true,
     };
     for (const mode of ['math', 'clock']) {
       const source = data.stats?.[mode];

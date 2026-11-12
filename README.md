@@ -8,13 +8,13 @@ URL cible après activation de Pages et fusion de la PR : **https://stevencayla.
 
 Depuis l’accueil, choisir **Horloge magique** ou **Maths magiques**. Utiliser les grandes touches du pavé ou les chiffres du clavier, puis **Lancer mon sort**. Pour l’horloge, toucher le champ heures ou minutes pour le modifier. Le champ minutes s’active automatiquement après une heure complète ; une heure à un chiffre comme 1 peut être saisie `01` ou en touchant ensuite le champ minutes. `C` efface le champ actif, `⌫` retire son dernier chiffre. `Tab` permet de parcourir les commandes et `Entrée` active le bouton sélectionné. `Échap` revient au menu.
 
-Une erreur affiche la correction, conserve tous les XP et permet de continuer. À la fin du chrono, la correction apparaît également. Le chrono se met en pause quand la page est en arrière-plan. Le **mode découverte** désactive le chrono et les bonus de rapidité.
+Une bonne réponse affiche immédiatement « Bravo ! », des étoiles et les points gagnés sur l’exercice, puis passe automatiquement au suivant après 1,2 seconde. Une erreur affiche la correction, conserve tous les XP et transforme le bouton en **Recommencer** pour réessayer le même exercice. Il n’y a plus de bouton « Sort suivant ». À la fin du chrono, la correction apparaît également. Le chrono se met en pause quand la page est en arrière-plan. Le **mode découverte** désactive le chrono et les bonus de rapidité.
 
 Dans **Aventure**, suivre les 20 étapes. Les coffres s’ouvrent automatiquement à leur arrivée, les objets apparaissent dans le **Grimoire**. Le combat final utilise les mêmes exercices : de 1 800 à 1 900 XP, chaque réussite dissipe l’ombre du dragon ; à 1 900 XP, la princesse est délivrée. L’entraînement peut continuer ensuite.
 
 ## Stack et architecture
 
-JavaScript ES modules, HTML sémantique, CSS responsive et Vite. Aucun framework d’interface ni service distant nécessaire au jeu. SVG originaux dessinés dans le dépôt, polices système : pas de dépendance à des images, polices ou ressources externes. Les icônes et le décor sont originaux, sans éléments de la licence Harry Potter.
+JavaScript ES modules, HTML sémantique, CSS responsive et Vite. Aucun framework d’interface ni service distant nécessaire au jeu. Illustration d’accueil originale au style arcade, SVG de l’académie et polices système : pas de dépendance à des images, polices ou ressources externes. Les icônes et le décor sont originaux, sans éléments de la licence Harry Potter.
 
 ```text
 src/
@@ -22,10 +22,12 @@ src/
     exercises.js    # Générateurs injectables, validation stricte, paliers, chrono
     progression.js  # Score, XP, séries, étapes, récompenses et statistiques
     storage.js      # Sauvegarde versionnée, validation et restauration
+  ui/sound.js       # Carillons Web Audio originaux, utilisables hors connexion
   ui/clock.js       # Rendu SVG de l’horloge (position réelle des deux aiguilles)
   main.js           # Contrôleur UI, navigation, saisie, cycle d’exercice, installation
   style.css         # Design translucide, responsive, focus et reduced motion
 public/
+  arcade-heroes.webp # Illustration originale de l’accueil arcade
   castle.svg        # Illustration originale de l’académie
   icon.svg
   icons/            # PNG 192/512, maskable et Apple Touch 180
@@ -82,6 +84,8 @@ Ouvrir `http://localhost:4173/magic-learning-quest/`. Tester la PWA sur ce build
 ## Sauvegarde et statistiques
 
 `localStorage['astrea.save']`, format **version 1**. Écriture après chaque réponse et chaque réglage. Restauration validée au démarrage, récompenses recalculées depuis les XP. Si le format est corrompu/incompatible, une alerte apparaît et une nouvelle partie en mémoire est proposée. Si le stockage est bloqué ou plein, l’application signale que la sauvegarde n’a pas réussi. Éviter de fermer dans ce cas.
+
+Les sons magiques sont synthétisés localement via Web Audio (carillon de victoire et son doux pour réessayer), sans téléchargement. Le son est activé depuis un geste utilisateur pour respecter les contraintes iPhone ; il se coupe dans l’exercice ou les réglages. La préférence est conservée, et les anciennes sauvegardes restent compatibles. Les particules et mouvements sont désactivés avec `prefers-reduced-motion`. Le passage automatique est annulé en quittant l’exercice et suspendu en arrière-plan. Les coffres et changements d’étape restent annoncés après le passage au sort suivant.
 
 La fonction `restore` centralise le point d’entrée des futures migrations de version. Aucune migration historique n’est requise pour cette première version ; une version future inconnue n’est pas interprétée silencieusement.
 

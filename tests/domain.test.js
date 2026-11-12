@@ -279,3 +279,16 @@ test('accès au stockage refusé dès la propriété localStorage', () => {
     else delete globalThis.localStorage;
   }
 });
+test('préférence audio persistante et anciennes sauvegardes préservées', () => {
+  const old = freshState();
+  old.xp = 125;
+  delete old.settings.sound;
+  const loaded = restore(JSON.stringify(old));
+  assert.equal(loaded.warning, '');
+  assert.equal(loaded.state.xp, 125);
+  assert.equal(loaded.state.settings.sound, true);
+  loaded.state.settings.sound = false;
+  assert.equal(restore(JSON.stringify(loaded.state)).state.settings.sound, false);
+  loaded.state.settings.sound = 'yes';
+  assert.ok(restore(JSON.stringify(loaded.state)).warning);
+});
