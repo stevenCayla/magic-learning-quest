@@ -80,9 +80,17 @@ async function ready(page, mode = 'clock') {
 }
 async function landscape(page) {
   await page.setViewportSize(battleSizes.get(page) ?? { width: 844, height: 390 });
-  // Deliver WebKit's resize frame while the test clock is paused.
-  await page.clock.runFor(100);
-  await expect(page.locator('.rotate-notice')).toBeHidden();
+  // WebKit can schedule the resize frame after setViewportSize resolves.
+  // Keep delivering frames until the real rotation handler has updated the UI.
+  await expect
+    .poll(
+      async () => {
+        await page.clock.runFor(50);
+        return page.locator('.rotate-notice').isHidden();
+      },
+      { message: 'La rotation doit être appliquée avant de démarrer le décompte' },
+    )
+    .toBe(true);
 }
 async function digits(page, n) {
   for (const digit of String(n)) await page.getByRole('button', { name: digit, exact: true }).tap();
