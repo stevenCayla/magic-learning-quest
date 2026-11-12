@@ -2,11 +2,7 @@ import { expect } from '@playwright/test';
 const base = '/magic-learning-quest/';
 const battleSizes = new WeakMap();
 const fixed = new Date('2026-01-01T00:00:00Z');
-async function boot(
-  page,
-  overrides = {},
-  viewport = { width: 844, height: 390 },
-) {
+async function boot(page, overrides = {}, viewport = { width: 844, height: 390 }) {
   battleSizes.set(page, viewport);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.clock.install({ time: fixed });
@@ -25,6 +21,9 @@ async function boot(
           streak: 0,
           bestStreak: 0,
           cycleCorrect: 0,
+          levelStartCorrect: 0,
+          health: 100,
+          defeats: 0,
           rewards: [],
         },
         math: {
@@ -33,6 +32,9 @@ async function boot(
           streak: 0,
           bestStreak: 0,
           cycleCorrect: 0,
+          levelStartCorrect: 0,
+          health: 100,
+          defeats: 0,
           rewards: [],
         },
       },
@@ -54,18 +56,16 @@ async function boot(
       history: [],
       ...overrides,
     };
-    if (overrides.clockXP !== undefined)
-      state.adventures.clock.xp = overrides.clockXP;
-    if (overrides.mathXP !== undefined)
-      state.adventures.math.xp = overrides.mathXP;
+    if (overrides.clockXP !== undefined) state.adventures.clock.xp = overrides.clockXP;
+    if (overrides.mathXP !== undefined) state.adventures.math.xp = overrides.mathXP;
+    if (overrides.clockHealth !== undefined) state.adventures.clock.health = overrides.clockHealth;
+    if (overrides.mathHealth !== undefined) state.adventures.math.health = overrides.mathHealth;
     state.xp = state.adventures.clock.xp + state.adventures.math.xp;
     localStorage.setItem('astrea.save', JSON.stringify(state));
     localStorage.setItem('test-seeded', '1');
   }, overrides);
   await page.goto(base);
-  await expect(
-    page.getByRole('heading', { name: 'Magic Learning Quest' }),
-  ).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Magic Learning Quest' })).toBeVisible();
 }
 async function ready(page, mode = 'clock') {
   await page
@@ -74,27 +74,18 @@ async function ready(page, mode = 'clock') {
     })
     .click();
   await landscape(page);
-  await expect(page.locator('.battle-shell')).toHaveAttribute(
-    'data-phase',
-    'countdown',
-  );
+  await expect(page.locator('.battle-shell')).toHaveAttribute('data-phase', 'countdown');
   await page.clock.runFor(5100);
-  await expect(page.locator('.battle-shell')).toHaveAttribute(
-    'data-phase',
-    'active',
-  );
+  await expect(page.locator('.battle-shell')).toHaveAttribute('data-phase', 'active');
 }
 async function landscape(page) {
-  await page.setViewportSize(
-    battleSizes.get(page) ?? { width: 844, height: 390 },
-  );
+  await page.setViewportSize(battleSizes.get(page) ?? { width: 844, height: 390 });
   // Deliver WebKit's resize frame while the test clock is paused.
   await page.clock.runFor(100);
   await expect(page.locator('.rotate-notice')).toBeHidden();
 }
 async function digits(page, n) {
-  for (const digit of String(n))
-    await page.getByRole('button', { name: digit, exact: true }).tap();
+  for (const digit of String(n)) await page.getByRole('button', { name: digit, exact: true }).tap();
 }
 async function solveClock(page) {
   await digits(page, '01');
@@ -110,9 +101,7 @@ async function finish(page) {
   await page.clock.runFor(1850);
 }
 async function menu(page) {
-  await page
-    .getByRole('button', { name: 'Retour au menu', exact: true })
-    .click();
+  await page.getByRole('button', { name: 'Retour au menu', exact: true }).click();
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(page.locator('.home-rotate')).toBeHidden();
 }

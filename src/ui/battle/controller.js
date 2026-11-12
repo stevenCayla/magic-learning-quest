@@ -5,7 +5,7 @@ import {
   validateAnswer,
   explanation,
 } from '../../domain/exercises.js';
-import { adventureFor, difficultyForAdventure } from '../../domain/adventures.js';
+import { adventureFor, difficultyForAdventure, restartLevel } from '../../domain/adventures.js';
 import { recordAnswer } from '../../domain/progression.js';
 import { encounter, DuelClock, SPELL_MS, avatarColor } from '../../domain/duel.js';
 import { openClockLesson } from '../clock-lesson.js';
@@ -83,8 +83,10 @@ export function createBattleController({ getState, setState, render, onNavigate,
         avatar: state.avatar,
         xp: progress.xp,
         sound: state.settings.sound,
+        health: progress.health,
       }),
     );
+    if (progress.health === 0) clock.phase = 'failure';
     if (clock.phase !== 'countdown') document.querySelector('.battle-go')?.remove();
     root().style.setProperty('--spell-color', avatarColor(state.avatar, 'wand'));
     document.querySelector('#battle-lesson')?.addEventListener('click', () => {
@@ -119,6 +121,8 @@ export function createBattleController({ getState, setState, render, onNavigate,
     document.querySelector('#rescue-home').onclick = () => onNavigate('home');
     syncOrientation();
     syncPhase();
+    syncPlayerHealth(progress.health);
+    if (progress.health === 0) showDefeat();
     window.scrollTo(0, 0);
     if (!phonePortrait.matches) document.querySelector('#main').focus({ preventScroll: true });
   }
@@ -173,7 +177,9 @@ export function createBattleController({ getState, setState, render, onNavigate,
           : clock.phase === 'failure-cast'
             ? 'Le sorcier riposte…'
             : clock.phase === 'failure'
-              ? 'Recommencer ↻'
+              ? adventureFor(getState(), mode).health === 0
+                ? 'Recommencer le niveau ↻'
+                : 'Recommencer ↻'
               : 'Lancer mon sort ✦';
     document.querySelector('#duel-intro').hidden = clock.phase !== 'countdown';
   }
@@ -213,6 +219,7 @@ export function createBattleController({ getState, setState, render, onNavigate,
     if (before !== clock.phase) {
       syncPhase();
       if (clock.phase === 'active' && getState().settings.sound) sounds.cue('go');
+      if (clock.phase === 'failure' && result?.defeated) showDefeat();
     }
     if (clock.phase === 'active' && exercise.limit) {
       const left = Math.max(0, exercise.limit - clock.answerMs / 1000);
@@ -230,10 +237,25 @@ export function createBattleController({ getState, setState, render, onNavigate,
         if (clock.phase === 'success')
           health.value = Math.max(0, current.remaining - result.result.xp);
         document.querySelector('#enemy-health-text').textContent = `${health.value} / 100`;
+        if (clock.phase !== 'success') syncPlayerHealth(result.health);
         root().classList.add('spell-hit');
       }
       if (clock.phase === 'success' && clock.spellMs >= SPELL_MS) advance();
     }
+  }
+  function syncPlayerHealth(value) {
+    document.querySelector('#player-health').value = value;
+    document.querySelector('#player-health-text').textContent = `${value} / 100 PV`;
+    root().classList.toggle('player-critical', value <= 25);
+  }
+  function showDefeat() {
+    syncPlayerHealth(0);
+    root().classList.add('player-defeated');
+    const feedback = document.querySelector('#feedback');
+    feedback.className = 'duel-feedback retry';
+    feedback.innerHTML =
+      '<h3>Duel perdu !</h3><p>Ta vie est épuisée. Recommence ce niveau avec toute ta vie.</p><small>Les niveaux terminés et tes étoiles sont conservés.</small>';
+    syncPhase();
   }
   function measureSpell() {
     if (!root()) return;
@@ -265,6 +287,12 @@ export function createBattleController({ getState, setState, render, onNavigate,
   function submit(timedOut = false) {
     if (!clock || blocked()) return;
     if (clock.phase === 'failure') {
+      if (adventureFor(getState(), mode).health === 0) {
+        setState(restartLevel(getState(), mode));
+        clock.question(performance.now(), true);
+        makeQuestion(false);
+        return;
+      }
       clock.question(performance.now());
       makeQuestion(true);
       return;
