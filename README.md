@@ -6,7 +6,7 @@ Application publiée sur GitHub Pages : **https://stevencayla.github.io/magic-le
 
 ## Jouer
 
-L’accueil ne comporte pas de navigation basse : la roue dentée en haut à droite ouvre les réglages et la personnalisation. Le grimoire reste accessible depuis l’aventure.
+L’accueil s’adapte aussi au paysage pour permettre de changer d’entraînement sans faire défiler la page. Il ne comporte pas de navigation basse : la roue dentée en haut à droite ouvre les réglages et la personnalisation. Le grimoire reste accessible depuis l’aventure.
 
 Depuis l’accueil, choisir **Horloge magique** ou **Maths magiques**. Utiliser les grandes touches du pavé ou les chiffres du clavier, puis **Lancer mon sort**. Pour l’horloge, toucher le champ heures ou minutes pour le modifier. Le champ minutes s’active automatiquement après une heure complète ; une heure à un chiffre comme 1 peut être saisie `01` ou en touchant ensuite le champ minutes. `C` efface le champ actif, `⌫` retire son dernier chiffre. `Tab` permet de parcourir les commandes et `Entrée` active le bouton sélectionné. `Échap` revient au menu.
 

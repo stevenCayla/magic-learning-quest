@@ -1274,3 +1274,89 @@
     opacity: 0.5;
   }
 }
+/* Keep both training choices immediately accessible when returning from a phone duel. */
+@media (max-width: 1000px) and (max-height: 600px) and (orientation: landscape) {
+  .is-home .topbar,
+  .is-home .sidebar {
+    display: none;
+  }
+  .is-home .layout {
+    display: block;
+  }
+  .is-home .arcade-home {
+    height: 100svh;
+    min-height: 312px;
+    max-width: none;
+    flex-direction: row;
+    align-items: center;
+  }
+  .is-home .arcade-brand {
+    width: 44%;
+    flex: none;
+    align-self: flex-start;
+    padding: 18px 12px 0 max(12px, env(safe-area-inset-left));
+  }
+  .is-home .arcade-brand h1 {
+    font-size: clamp(40px, 7vw, 64px);
+    margin: 12px 0 8px;
+    -webkit-text-stroke-width: 5px;
+  }
+  .is-home .arcade-brand > p:first-child {
+    font-size: 8px;
+    letter-spacing: 2px;
+  }
+  .is-home .arcade-subtitle {
+    font-size: 10px;
+    margin-top: 12px;
+  }
+  .is-home .arcade-heroes {
+    background-size: auto 140%;
+    background-position: left center;
+  }
+  .is-home .arcade-home::after {
+    background: linear-gradient(90deg, #221b2b11 22%, #211b2b88 46%, #171224ef 72%);
+  }
+  .is-home .arcade-home-bottom {
+    width: 54%;
+    margin: 0 max(12px, env(safe-area-inset-right)) 0 auto;
+    padding: 44px 10px 6px;
+  }
+  .is-home .arcade-home-progress {
+    font-size: 9px;
+    padding: 7px 9px;
+    margin-bottom: 9px;
+  }
+  .is-home .arcade-home-progress strong {
+    font-size: 12px;
+  }
+  .is-home .arcade-menu {
+    gap: 8px;
+  }
+  .is-home .arcade-menu-button {
+    min-height: 54px;
+    padding: 5px 12px;
+    font-size: 18px;
+    gap: 8px;
+    border-radius: 13px;
+  }
+  .is-home .arcade-menu-button small {
+    font-size: 9px;
+  }
+  .is-home .arcade-menu-button > span:first-child {
+    font-size: 28px;
+    min-width: 28px;
+  }
+  .is-home .arcade-menu-button > span:last-child {
+    font-size: 18px;
+  }
+  .is-home .arcade-current-stage {
+    font-size: 9px;
+    margin-top: 8px;
+  }
+  .home-settings {
+    width: 44px;
+    height: 44px;
+    font-size: 27px;
+    top: 9px;
+  }
+}

@@ -484,6 +484,12 @@ for (const [name, width, height] of [
 ]) {
   test(`responsive combat : ${name}`, async ({ page }, testInfo) => {
     await boot(page, {}, { width, height });
+    if (height <= 390) {
+      const clockChoice = await page.locator('#choose-clock').boundingBox();
+      const mathChoice = await page.locator('#choose-math').boundingBox();
+      expect(clockChoice.y + clockChoice.height).toBeLessThanOrEqual(height);
+      expect(mathChoice.y + mathChoice.height).toBeLessThanOrEqual(height);
+    }
     await ready(page);
     expect(
       await page.evaluate(
