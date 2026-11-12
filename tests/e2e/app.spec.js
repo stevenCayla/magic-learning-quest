@@ -449,3 +449,24 @@ test('arrière-plan : le résultat reste disponible au retour, sans récompense 
   await expect(page.locator('#feedback')).toBeEmpty();
   await expect(page.getByTestId('xp')).toHaveText('20 XP');
 });
+
+test('un coffre annoncé ne bloque pas le bouton du prochain sort sur iPhone', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await seed(page, { xp: 80 });
+  await page.goto(base);
+  await page.getByRole('button', { name: /Horloge magique/ }).click();
+  await solveClock(page);
+  await expect(page.locator('#feedback')).toBeEmpty();
+  await expect(page.locator('#toast')).toContainText('Baguette de noisetier');
+  const target = await page.locator('#validate').boundingBox();
+  expect(
+    await page.evaluate(
+      ({ x, y }) => {
+        return document.elementFromPoint(x, y)?.closest('button')?.id;
+      },
+      { x: target.x + target.width / 2, y: target.y + target.height / 2 },
+    ),
+  ).toBe('validate');
+  await solveClock(page);
+  await expect(page.getByTestId('xp')).toHaveText('120 XP');
+});
