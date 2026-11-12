@@ -1,0 +1,23 @@
+{
+  "id": "/magic-learning-quest/",
+  "name": "Magic Learning Quest · Astréa",
+  "short_name": "Astréa",
+  "lang": "fr",
+  "description": "Une aventure magique pour apprendre l’heure et le calcul mental.",
+  "start_url": "/magic-learning-quest/",
+  "scope": "/magic-learning-quest/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#101321",
+  "theme_color": "#13162c",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    {
+      "src": "icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

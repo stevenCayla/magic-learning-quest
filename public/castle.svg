@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" fill="none">
+<defs><linearGradient id="sky" x2="0" y2="800" gradientUnits="userSpaceOnUse"><stop stop-color="#222a54"/><stop offset=".55" stop-color="#665982"/><stop offset="1" stop-color="#c29491"/></linearGradient><linearGradient id="mount" x2="0" y2="800"><stop stop-color="#595a80"/><stop offset="1" stop-color="#202940"/></linearGradient><linearGradient id="stone" x2="0" y2="600" gradientUnits="userSpaceOnUse"><stop stop-color="#9ca1be"/><stop offset="1" stop-color="#3e476a"/></linearGradient><linearGradient id="roof"><stop stop-color="#293452"/><stop offset="1" stop-color="#171e37"/></linearGradient><radialGradient id="glow"><stop stop-color="#ffefd0" stop-opacity=".7"/><stop offset="1" stop-color="#ffd79a" stop-opacity="0"/></radialGradient><filter id="blur"><feGaussianBlur stdDeviation="20"/></filter><pattern id="windows" width="38" height="50" patternUnits="userSpaceOnUse"><path d="M17 30v-9a4 4 0 0 1 8 0v9z" fill="#ffd991"/></pattern><g id="pine"><path d="M0 0-22 50h11l-25 40h24l-31 45H43L12 90h24L11 50h11z" fill="#162d39"/><path d="M-3 110h6v40h-6z" fill="#182839"/></g></defs>
+<path fill="url(#sky)" d="M0 0h1200v800H0z"/>
+<g fill="#fff5d5" opacity=".8"><circle cx="124" cy="86" r="1.6"/><circle cx="265" cy="155" r="1"/><circle cx="422" cy="64" r="2"/><circle cx="679" cy="106" r="1"/><circle cx="1002" cy="71" r="2"/><circle cx="1113" cy="190" r="1"/><circle cx="873" cy="195" r="1.5"/><circle cx="180" cy="253" r="1.5"/><circle cx="766" cy="40" r="1"/></g>
+<circle cx="880" cy="172" r="125" fill="url(#glow)"/><circle cx="880" cy="172" r="40" fill="#eee6d9"/><circle cx="894" cy="159" r="36" fill="#55517a"/>
+<path d="m0 439 155-187 129 124L458 191l183 238 141-141 182 131 100-92 136 99v374H0z" fill="#76708d" opacity=".45"/>
+<path d="m0 504 227-168 229 170L641 336l282 181 168-154 109 97v340H0z" fill="url(#mount)"/>
+<ellipse cx="647" cy="618" rx="440" ry="52" fill="#d9b3c1" opacity=".18" filter="url(#blur)"/>
+<path d="m300 800 101-194 105-34 43-87 170 3 80 89 116 44 105 179z" fill="#25334b"/>
+<path d="m578 800 46-101-34-37 70-55 26-66 25 22-31 65-54 39 38 38-18 95" fill="#b5a8b0" opacity=".5"/>
+<g stroke="#34415c" stroke-width="3"><path d="M463 385h306v198H463z" fill="url(#stone)"/><path d="m448 386 164-104 170 104z" fill="url(#roof)"/>
+<path d="M410 311h74v291h-74z" fill="url(#stone)"/><path d="m397 312 50-123 51 123z" fill="url(#roof)"/><path d="M749 304h65v302h-65z" fill="url(#stone)"/><path d="m735 305 47-145 47 145z" fill="url(#roof)"/>
+<path d="M567 223h88v292h-88z" fill="url(#stone)"/><path d="m550 224 61-155 61 155z" fill="url(#roof)"/>
+<path d="M504 467h221v138H504z" fill="url(#stone)"/><path d="M495 468v-30h20v16h20v-16h20v16h20v-16h20v16h20v-16h20v16h20v-16h20v16h20v-16h20v16h20v-16h20v30z" fill="#8d91aa"/>
+<path d="M589 605v-61a27 27 0 0 1 54 0v61" fill="#1e2946"/><path d="M610 601v-54a12 12 0 0 1 24 0v54" fill="#ffc780" opacity=".9"/>
+<path d="M575 253h72v170h-72zM419 338h54v202h-54zM758 331h47v223h-47zM490 395h251v35H490z" fill="url(#windows)" stroke="none"/>
+<circle cx="611" cy="295" r="26" fill="#e9d9b5"/><path d="M611 277v18l14 8" stroke="#3b4662" stroke-width="4"/>
+<path d="M611 68V35m0 0 42 12-42 11M447 190v-37m0 0 30 10-30 9M782 160v-42m0 0 35 11-35 11" stroke="#d2b894" fill="#c6a6c0"/></g>
+<g opacity=".55"><use href="#pine" transform="translate(110 476) scale(1.4)"/><use href="#pine" transform="translate(218 510)"/><use href="#pine" transform="translate(1020 480) scale(1.5)"/><use href="#pine" transform="translate(935 550)"/></g>
+<path d="M0 699q150-118 310 22t359 35 531-65v109H0z" fill="#152a35"/>
+<use href="#pine" transform="translate(62 547) scale(1.8)"/><use href="#pine" transform="translate(174 612) scale(1.4)"/><use href="#pine" transform="translate(1120 535) scale(2)"/><use href="#pine" transform="translate(1018 648) scale(1.2)"/>
+<g fill="#f7d897"><circle cx="280" cy="672" r="3"/><circle cx="345" cy="722" r="2"/><circle cx="850" cy="683" r="3"/><circle cx="913" cy="745" r="2"/><circle cx="380" cy="583" r="2"/></g>
+</svg>
