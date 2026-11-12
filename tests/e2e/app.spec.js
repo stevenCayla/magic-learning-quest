@@ -54,7 +54,7 @@ test('parcours complet horloge → XP → maths → sauvegarde → réglages et 
   page.on('pageerror', (e) => errors.push(e.message));
   await seed(page);
   await page.goto(base);
-  await expect(page.getByRole('heading', { name: /À toi de jouer/ })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Magic Learning Quest' })).toBeVisible();
   await page.getByRole('button', { name: /Horloge magique/ }).click();
   await expect(page.getByRole('img', { name: /Horloge à lire/ })).toBeVisible();
   await solveClock(page);
@@ -94,7 +94,7 @@ test('erreur encourageante, correction et absence de double récompense', async 
   await page.getByRole('button', { name: 'Lancer mon sort' }).click();
   await expect(page.getByText(/Il est 1 h 00/)).toBeVisible();
   await expect(page.getByTestId('xp')).toHaveText('0 XP');
-  await page.getByRole('button', { name: 'Je continue' }).click();
+  await page.getByRole('button', { name: 'Recommencer' }).click();
   await solveClock(page);
   await page.keyboard.press('Enter');
   const s = await page.evaluate(() => JSON.parse(localStorage.getItem('astrea.save')));
@@ -114,7 +114,9 @@ test('clavier, focus visible et champs heures/minutes', async ({ page }) => {
   await page.getByRole('button', { name: 'Lancer mon sort' }).focus();
   await page.keyboard.press('Enter');
   await expect(page.getByTestId('xp')).toHaveText('20 XP');
-  await expect(page.getByRole('button', { name: 'Sort suivant' })).toBeFocused();
+  await expect(page.getByRole('button', { name: 'Sort suivant' })).toHaveCount(0);
+  await expect(page.locator('#feedback')).toBeEmpty();
+  await expect(page.locator('#main')).toBeFocused();
 });
 
 test('coffre partagé, dragon et délivrance de la princesse', async ({ page }) => {
@@ -127,7 +129,7 @@ test('coffre partagé, dragon et délivrance de la princesse', async ({ page }) 
   await expect(page.getByText(/Aélis est délivrée/)).toBeVisible();
   await expect(page.getByText(/Couronne de l’aurore/)).toBeVisible();
   await page.getByRole('button', { name: '← Menu' }).click();
-  await expect(page.getByRole('heading', { name: 'La lumière est de retour.' })).toBeVisible();
+  await expect(page.getByText('👑 Aélis est libre !', { exact: true })).toBeVisible();
 });
 
 for (const [name, width, height] of [
@@ -146,6 +148,10 @@ for (const [name, width, height] of [
         await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
       ).toBe(true);
     await noOverflow();
+    if (name === 'iPhone moderne') {
+      const lastButton = await page.locator('#explore').boundingBox();
+      expect(lastButton.y + lastButton.height).toBeLessThan(height - 72);
+    }
     for (const mode of ['Horloge magique', 'Maths magiques']) {
       await page.getByRole('button', { name: new RegExp(mode) }).click();
       await noOverflow();
@@ -166,7 +172,10 @@ for (const [name, width, height] of [
       }
       if (mode.startsWith('Horloge')) await solveClock(page);
       else await solveMath(page);
-      await expect(page.getByRole('button', { name: 'Sort suivant' })).toBeVisible();
+      await expect(
+        page.locator('#feedback').getByRole('heading', { name: 'Bravo !' }),
+      ).toBeVisible();
+      await expect(page.locator('#feedback')).toBeEmpty();
       await page.getByRole('button', { name: '← Menu' }).click();
     }
     const navigation = page.getByRole('navigation', {
@@ -216,11 +225,11 @@ test('manifest, assets sans 404, cache versionné, service worker, rechargement 
   });
   expect(caches.names.some((n) => /^astrea-[a-f0-9]{12}$/.test(n))).toBe(true);
   expect(caches.urls.some((u) => u.includes('/assets/') && u.endsWith('.js'))).toBe(true);
-  expect(caches.urls.some((u) => u.endsWith('/castle.svg'))).toBe(true);
+  expect(caches.urls.some((u) => u.endsWith('/arcade-heroes.webp'))).toBe(true);
   await context.setOffline(true);
   await page.reload();
   await expect(
-    page.getByRole('heading', { name: /À toi de jouer/ }),
+    page.getByRole('heading', { name: 'Magic Learning Quest' }),
     JSON.stringify(errors),
   ).toBeVisible();
   await page.getByRole('button', { name: /Maths magiques/ }).click();
@@ -243,7 +252,7 @@ test('sauvegarde corrompue, récupération et mode reduced motion', async ({ pag
   ).toBeVisible();
   expect(
     await page
-      .locator('.training-card')
+      .locator('.arcade-menu-button')
       .first()
       .evaluate((el) => getComputedStyle(el).transitionDuration),
   ).toBe('0s');
@@ -255,7 +264,7 @@ test('expiration du chrono et conservation des XP', async ({ page }) => {
   await page.goto(base);
   await page.getByRole('button', { name: /Maths magiques/ }).click();
   await page.clock.runFor(31000);
-  await expect(page.getByText('☾ Le temps s’est envolé.')).toBeVisible();
+  await expect(page.getByText('Le temps s’est envolé !')).toBeVisible();
   await expect(page.getByTestId('xp')).toHaveText('80 XP');
   const s = await page.evaluate(() => JSON.parse(localStorage.getItem('astrea.save')));
   expect(s.history.at(-1).timedOut).toBe(true);
@@ -289,6 +298,154 @@ test('stockage plein : message explicite et partie encore jouable', async ({ pag
   await expect(
     page.getByRole('status').filter({ hasText: /sauvegarde est indisponible/ }),
   ).toBeVisible();
-  await page.getByRole('button', { name: 'Sort suivant' }).click();
+  await expect(page.locator('#feedback')).toBeEmpty();
   await expect(page.getByRole('heading', { name: 'Maths magiques' })).toBeVisible();
+});
+
+test('arcade : un clic, récompense unique et passage automatique sans bouton suivant', async ({
+  page,
+}) => {
+  await page.clock.install({ time: new Date('2026-01-01T00:00:00Z') });
+  await page.clock.pauseAt(new Date('2026-01-01T00:00:01Z'));
+  await seed(page);
+  await page.goto(base);
+  await page.getByRole('button', { name: /Maths magiques/ }).click();
+  await solveMath(page);
+  await expect(page.locator('#feedback')).toContainText('Bravo !');
+  await expect(page.locator('.arcade-star')).toHaveCount(14);
+  await expect(page.getByRole('button', { name: 'Sort suivant' })).toHaveCount(0);
+  await expect(page.locator('#validate')).toBeDisabled();
+  await page.keyboard.press('Enter');
+  await page.keyboard.type('999');
+  await page.clock.runFor(1000);
+  await expect(page.locator('#feedback')).toContainText('Bravo !');
+  await page.clock.runFor(250);
+  await expect(page.locator('#feedback')).toBeEmpty();
+  await expect(page.locator('#math-answer')).toHaveText('?');
+  await expect(page.locator('#validate')).toBeDisabled();
+  const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('astrea.save')));
+  expect(saved.xp).toBe(20);
+  expect(saved.stats.math.correct).toBe(1);
+});
+
+test('erreur : correction stable et recommencer le même calcul', async ({ page }) => {
+  await page.clock.install();
+  await seed(page);
+  await page.goto(base);
+  await page.getByRole('button', { name: /Maths magiques/ }).click();
+  const before = await page.locator('.math-problem').textContent();
+  await digits(page, '999');
+  await page.getByRole('button', { name: 'Lancer mon sort' }).click();
+  await expect(page.locator('#feedback')).toContainText('Oups, c’est raté !');
+  await expect(page.locator('#feedback')).toContainText('1 + 1 = 2');
+  await page.clock.runFor(5000);
+  await expect(page.getByRole('button', { name: 'Recommencer' })).toBeEnabled();
+  await page.evaluate(() => {
+    Math.random = () => 0.9999;
+  });
+  await page.getByRole('button', { name: 'Recommencer' }).click();
+  await expect(page.locator('#feedback')).toBeEmpty();
+  await expect(page.locator('.math-problem')).toHaveText(before);
+  await expect(page.locator('#math-answer')).toHaveText('?');
+  await solveMath(page);
+  await expect(page.getByTestId('xp')).toHaveText('20 XP');
+});
+
+test('quitter annule le passage automatique et la réduction des mouvements reste respectée', async ({
+  page,
+}) => {
+  await page.clock.install();
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await seed(page);
+  await page.goto(base);
+  await page.getByRole('button', { name: /Horloge magique/ }).click();
+  await solveClock(page);
+  expect(
+    await page.locator('.arcade-particles').evaluate((el) => getComputedStyle(el).display),
+  ).toBe('none');
+  expect(await page.locator('#feedback').evaluate((el) => getComputedStyle(el).animationName)).toBe(
+    'none',
+  );
+  await page.getByRole('button', { name: '← Menu' }).click();
+  await page.clock.runFor(3000);
+  await expect(page.getByRole('heading', { name: 'Magic Learning Quest' })).toBeVisible();
+  await expect(page.locator('.exercise-layout')).toHaveCount(0);
+});
+
+test('sons : Web Audio activé par le geste, carillon réel et préférence conservée', async ({
+  page,
+}) => {
+  await seed(page);
+  await page.addInitScript(() => {
+    window.audioNotes = [];
+    const Original = window.AudioContext;
+    window.AudioContext = class extends Original {
+      constructor(...args) {
+        super(...args);
+        window.testAudioContext = this;
+      }
+      createOscillator() {
+        const oscillator = super.createOscillator();
+        const start = oscillator.start.bind(oscillator);
+        oscillator.start = (...args) => {
+          window.audioNotes.push(oscillator.frequency.value);
+          start(...args);
+        };
+        return oscillator;
+      }
+    };
+  });
+  await page.goto(base);
+  await page.getByRole('button', { name: /Maths magiques/ }).click();
+  expect(await page.evaluate(() => !!window.testAudioContext)).toBe(false);
+  await solveMath(page);
+  await expect.poll(() => page.evaluate(() => window.audioNotes.length)).toBe(4);
+  expect(await page.evaluate(() => window.testAudioContext.state)).toBe('running');
+  await page.getByRole('button', { name: 'Couper les sons' }).click();
+  await expect(page.locator('#feedback')).toBeEmpty();
+  await solveMath(page);
+  expect(await page.evaluate(() => window.audioNotes.length)).toBe(4);
+  await page.reload();
+  await nav(page, 'Réglages').click();
+  await expect(page.getByRole('checkbox', { name: /Sons magiques/ })).not.toBeChecked();
+});
+
+test('audio indisponible : le jeu et les XP continuent', async ({ page }) => {
+  await seed(page);
+  await page.addInitScript(() => {
+    window.AudioContext = class {
+      constructor() {
+        throw Error('Unavailable');
+      }
+    };
+  });
+  await page.goto(base);
+  await page.getByRole('button', { name: /Maths magiques/ }).click();
+  await solveMath(page);
+  await expect(page.getByTestId('xp')).toHaveText('20 XP');
+  await expect(page.locator('#feedback')).toBeEmpty();
+});
+
+test('arrière-plan : le résultat reste disponible au retour, sans récompense supplémentaire', async ({
+  page,
+}) => {
+  await page.clock.install({ time: new Date('2026-01-01T00:00:00Z') });
+  await page.clock.pauseAt(new Date('2026-01-01T00:00:01Z'));
+  await seed(page);
+  await page.goto(base);
+  await page.getByRole('button', { name: /Maths magiques/ }).click();
+  await solveMath(page);
+  await page.evaluate(() => {
+    Object.defineProperty(document, 'hidden', { configurable: true, value: true });
+    document.dispatchEvent(new Event('visibilitychange'));
+  });
+  await page.clock.runFor(5000);
+  await expect(page.locator('#feedback')).toContainText('Bravo !');
+  await page.evaluate(() => {
+    Object.defineProperty(document, 'hidden', { configurable: true, value: false });
+    document.dispatchEvent(new Event('visibilitychange'));
+  });
+  await page.clock.runFor(1250);
+  await expect(page.locator('#feedback')).toBeEmpty();
+  await expect(page.getByTestId('xp')).toHaveText('20 XP');
 });

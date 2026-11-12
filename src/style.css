@@ -1792,3 +1792,479 @@ progress::-moz-progress-bar {
     padding: 8px;
   }
 }
+/* Arcade results stay on the exercise; the keypad never moves. */
+.exercise-board {
+  position: relative;
+  isolation: isolate;
+}
+.sound-toggle {
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: #c7b3ff14;
+  border: 1px solid var(--border);
+  color: var(--lilac);
+  font-size: 20px;
+}
+.sound-toggle span {
+  font-size: 10px;
+}
+.exercise-meta .tag {
+  margin-right: auto;
+}
+.exercise-meta #timer {
+  margin-right: 8px;
+}
+.arcade-feedback {
+  position: absolute;
+  inset: 64px 12px 12px;
+  z-index: 2;
+  border: 1px solid #bbebd066;
+  border-radius: 18px;
+  background: radial-gradient(ellipse at 50% 30%, #275749, #171d32 72%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 18px;
+  pointer-events: none;
+  overflow: hidden;
+  animation: arcade-arrive 220ms ease-out;
+}
+.arcade-feedback.retry {
+  background: radial-gradient(ellipse at 50% 30%, #56375c, #171d32 72%);
+  border-color: #d7a0bb66;
+}
+.arcade-feedback h3 {
+  position: relative;
+  font-size: clamp(25px, 4vw, 42px);
+  font-family: Georgia, serif;
+  color: #d8ffe8;
+  text-shadow: 0 0 30px #8dffc866;
+}
+.arcade-feedback.retry h3 {
+  color: #ffe3c8;
+  text-shadow: none;
+}
+.arcade-medallion {
+  color: var(--gold);
+  font-size: 55px;
+  line-height: 1;
+  margin-bottom: 9px;
+  filter: drop-shadow(0 0 18px #eaca9177);
+  animation: arcade-medal 650ms cubic-bezier(0.2, 1.5, 0.3, 1);
+}
+.arcade-caption {
+  color: #ece4f4;
+  font-size: 13px;
+  margin-top: 6px;
+}
+.arcade-points {
+  color: var(--gold);
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.15;
+  margin-top: 14px;
+  animation: arcade-score 500ms ease-out;
+}
+.arcade-points span {
+  display: block;
+  color: #d7ffe5;
+  font-size: 16px;
+  margin-top: 6px;
+}
+.arcade-followup {
+  font-size: 11px;
+  margin-top: 14px;
+}
+.arcade-correction {
+  color: #fff1df;
+  font-size: 13px;
+  line-height: 1.6;
+  margin-top: 12px;
+  max-width: 330px;
+}
+.arcade-feedback > p:not([class]) {
+  font-size: 12px;
+  margin-top: 8px;
+  color: #f5dfb4;
+}
+.arcade-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.arcade-star {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  color: var(--gold);
+  font-size: 24px;
+  opacity: 0;
+  animation: arcade-star 950ms ease-out var(--delay) both;
+}
+@keyframes arcade-star {
+  0% {
+    transform: rotate(var(--angle)) translateX(0) scale(0.2);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(var(--angle)) translateX(var(--reach)) rotate(100deg) scale(0.6);
+    opacity: 0;
+  }
+}
+@keyframes arcade-arrive {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes arcade-medal {
+  from {
+    transform: scale(0.4) rotate(-35deg);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes arcade-score {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (max-width: 580px) {
+  .sound-toggle {
+    min-height: 44px;
+    font-size: 19px;
+  }
+  .sound-toggle span {
+    display: none;
+  }
+  .arcade-feedback {
+    inset: 62px 10px 10px;
+    padding: 12px;
+  }
+  .arcade-medallion {
+    font-size: 40px;
+    margin-bottom: 4px;
+  }
+  .arcade-feedback h3 {
+    font-size: 28px;
+  }
+  .arcade-points {
+    margin-top: 9px;
+    font-size: 28px;
+  }
+  .arcade-correction {
+    font-size: 12px;
+    margin-top: 6px;
+  }
+  .arcade-caption {
+    font-size: 11px;
+  }
+  .arcade-followup {
+    margin-top: 8px;
+  }
+  .arcade-feedback > p:not([class]) {
+    font-size: 10px;
+    margin-top: 4px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .arcade-feedback,
+  .arcade-medallion,
+  .arcade-points,
+  .arcade-star {
+    animation: none !important;
+  }
+  .arcade-particles {
+    display: none;
+  }
+}
+/* Original illustrated arcade title screen. */
+.is-home main {
+  padding: 0;
+}
+.arcade-home {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: max(760px, calc(100svh - 100px));
+  max-width: 1160px;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #fff6dc;
+  background: radial-gradient(ellipse at 50% 34%, #f7d274, #aa6cbd 50%, #2f194b 77%);
+}
+.arcade-home::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    #20174088 0%,
+    transparent 32%,
+    transparent 50%,
+    #24102cf2 79%,
+    #171224 100%
+  );
+  pointer-events: none;
+}
+.arcade-brand {
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  padding: 27px 20px 0;
+}
+.arcade-brand > p:first-child {
+  color: #fff0c7;
+  letter-spacing: 4px;
+  font-size: 11px;
+  font-weight: 900;
+  text-shadow: 0 2px 3px #211126;
+}
+.arcade-brand h1 {
+  font-family: 'Arial Black', 'Trebuchet MS', system-ui, sans-serif;
+  font-style: italic;
+  font-weight: 1000;
+  font-size: clamp(58px, 7vw, 98px);
+  letter-spacing: -5px;
+  line-height: 0.83;
+  transform: rotate(-5deg);
+  margin: 17px 0 15px;
+  paint-order: stroke fill;
+  -webkit-text-stroke: 7px #28152f;
+  filter: drop-shadow(0 5px 0 #120f1f) drop-shadow(0 0 2px #fff3c9);
+}
+.arcade-brand h1 span {
+  display: block;
+  color: #b7f26a;
+  text-shadow: 0 5px 0 #49765b;
+}
+.arcade-brand h1 span:last-child {
+  color: #ffdc63;
+  text-shadow: 0 5px 0 #bd653b;
+  margin-top: 10px;
+}
+.arcade-subtitle {
+  color: #fff7e4;
+  font-size: 12px;
+  font-weight: 700;
+  text-shadow: 0 2px 4px #211126;
+  margin-top: 19px;
+}
+.arcade-heroes {
+  position: absolute;
+  z-index: -2;
+  inset: 0;
+  background: url('/arcade-heroes.webp') center top / 100% auto no-repeat;
+}
+.arcade-home-bottom {
+  margin-top: auto;
+  position: relative;
+  width: min(100%, 420px);
+  padding: 230px 24px 22px;
+}
+.arcade-home-progress {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 9px;
+  font-size: 11px;
+  margin-bottom: 12px;
+  border: 2px solid #e6bc6b77;
+  border-radius: 13px;
+  padding: 10px 13px;
+  background: #24172be6;
+  box-shadow: 0 3px 0 #120c20;
+}
+.arcade-home-progress strong {
+  color: #ffdc63;
+  font-size: 13px;
+}
+.arcade-menu {
+  display: grid;
+  gap: 13px;
+}
+.arcade-menu-button {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 71px;
+  padding: 10px 18px;
+  background: linear-gradient(#d3fb8e, #9bd748 45%, #75af2a);
+  color: #24351e;
+  border: 3px solid #303023;
+  border-radius: 17px;
+  box-shadow:
+    inset 0 3px 0 #f7ffd5aa,
+    inset 0 -4px 0 #57842488,
+    0 5px 0 #140c1f,
+    0 0 0 2px #c3ec79;
+  text-align: left;
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: -0.6px;
+  text-shadow: 0 1px 0 #ffffff70;
+  touch-action: manipulation;
+}
+.arcade-menu-button > span:first-child {
+  font-size: 37px;
+  min-width: 34px;
+  text-align: center;
+}
+.arcade-menu-button > span:last-child {
+  margin-left: auto;
+  font-size: 22px;
+}
+.arcade-menu-button small {
+  display: block;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 0.1px;
+  margin-top: 2px;
+}
+.arcade-menu-button.math-button {
+  background: linear-gradient(#caeaff, #82cbe9 45%, #4c98ca);
+  color: #193656;
+  box-shadow:
+    inset 0 3px 0 #e3f9ffbb,
+    inset 0 -4px 0 #386ca188,
+    0 5px 0 #140c1f,
+    0 0 0 2px #84c7f1;
+}
+.arcade-menu-button.adventure-button {
+  background: linear-gradient(#ffe598, #efbc59 45%, #cf8e32);
+  color: #543416;
+  box-shadow:
+    inset 0 3px 0 #fff6c9aa,
+    inset 0 -4px 0 #9e622a88,
+    0 5px 0 #140c1f,
+    0 0 0 2px #e9c473;
+}
+.arcade-menu-button:hover {
+  filter: brightness(1.08);
+  transform: translateY(-2px);
+}
+.arcade-current-stage {
+  text-align: center;
+  font-size: 11px;
+  color: #f1d6bc;
+  margin-top: 17px;
+}
+@media (min-width: 851px) {
+  .arcade-home {
+    min-height: 860px;
+  }
+  .arcade-heroes {
+    background-size: auto 100%;
+    background-color: #281c4c;
+  }
+  .arcade-home-bottom {
+    padding-top: 235px;
+  }
+}
+@media (max-width: 850px) {
+  .is-home .topbar {
+    display: none;
+  }
+  .is-home main {
+    padding: 0 0 max(80px, calc(76px + env(safe-area-inset-bottom)));
+  }
+  .arcade-home {
+    min-height: max(720px, calc(100svh - 76px - env(safe-area-inset-bottom)));
+  }
+  .arcade-brand {
+    padding-top: max(22px, env(safe-area-inset-top));
+  }
+  .arcade-brand h1 {
+    font-size: clamp(64px, 11vw, 100px);
+  }
+}
+@media (max-width: 580px) {
+  .arcade-home {
+    min-height: max(715px, calc(100svh - 76px - env(safe-area-inset-bottom)));
+  }
+  .arcade-brand > p:first-child {
+    font-size: 9px;
+    letter-spacing: 3px;
+  }
+  .arcade-brand h1 {
+    font-size: 67px;
+    -webkit-text-stroke-width: 6px;
+  }
+  .arcade-subtitle {
+    font-size: 11px;
+    margin-top: 16px;
+  }
+  .arcade-home-bottom {
+    padding: 230px 27px 18px;
+  }
+  .arcade-menu-button {
+    font-size: 21px;
+    min-height: 67px;
+    padding: 9px 15px;
+  }
+  .arcade-home-progress {
+    font-size: 10px;
+    padding: 9px 10px;
+  }
+  .arcade-heroes {
+    background-position: center top;
+  }
+}
+@media (max-width: 360px) {
+  .arcade-brand h1 {
+    font-size: 58px;
+  }
+  .arcade-home-bottom {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  .arcade-menu-button {
+    font-size: 18px;
+    gap: 10px;
+  }
+  .arcade-home-progress {
+    font-size: 9px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .arcade-menu-button:hover {
+    transform: none;
+  }
+}
+
+.arcade-current-stage strong {
+  display: block;
+  color: var(--gold);
+  margin-bottom: 4px;
+}
+@media (max-width: 580px) {
+  .arcade-feedback .arcade-unlock {
+    display: none;
+  }
+}
