@@ -27,23 +27,27 @@ export function createSoundPlayer() {
     }
     active.clear();
   }
-  function play(correct) {
+  function sequence(
+    notes,
+    { spacing = 0.085, duration = 0.27, type = 'sine', volume = 0.12, glide = false } = {},
+  ) {
     stop();
     const token = generation;
     // unlock() executes synchronously until resume() has been called.
     void unlock().then((ready) => {
       if (!ready || token !== generation) return;
-      const notes = correct ? [523.25, 659.25, 783.99, 1046.5] : [392, 329.63];
       try {
         notes.forEach((frequency, index) => {
           const oscillator = context.createOscillator();
           const gain = context.createGain();
-          const at = context.currentTime + index * (correct ? 0.085 : 0.13);
-          oscillator.type = 'sine';
+          const at = context.currentTime + index * spacing;
+          oscillator.type = type;
           oscillator.frequency.setValueAtTime(frequency, at);
           gain.gain.setValueAtTime(0, at);
-          gain.gain.linearRampToValueAtTime(0.12, at + 0.012);
-          gain.gain.exponentialRampToValueAtTime(0.001, at + 0.27);
+          if (glide)
+            oscillator.frequency.exponentialRampToValueAtTime(frequency * 2.5, at + duration * 0.7);
+          gain.gain.linearRampToValueAtTime(volume, at + 0.012);
+          gain.gain.exponentialRampToValueAtTime(0.001, at + duration);
           oscillator.connect(gain);
           gain.connect(context.destination);
           active.add(oscillator);
@@ -53,12 +57,38 @@ export function createSoundPlayer() {
             gain.disconnect();
           };
           oscillator.start(at);
-          oscillator.stop(at + 0.3);
+          oscillator.stop(at + duration + 0.03);
         });
       } catch {
         stop();
       } // An unavailable audio device must never block the game.
     });
   }
-  return { unlock, play, stop };
+  const play = (correct) =>
+    sequence(correct ? [523.25, 659.25, 783.99, 1046.5] : [392, 329.63], {
+      spacing: correct ? 0.085 : 0.13,
+    });
+  function cue(kind, count = 5) {
+    if (kind === 'tick')
+      sequence([220 + (5 - count) * 65], { type: 'triangle', volume: 0.08, duration: 0.11 });
+    else if (kind === 'go')
+      sequence([440, 660, 880], { type: 'triangle', duration: 0.22, volume: 0.1 });
+    else if (kind === 'cast')
+      sequence([180, 360, 720], {
+        type: 'triangle',
+        duration: 0.36,
+        spacing: 0.07,
+        glide: true,
+        volume: 0.09,
+      });
+    else if (kind === 'impact')
+      sequence([95, 190, 760, 1046.5], {
+        type: 'triangle',
+        duration: 0.28,
+        spacing: 0.045,
+        volume: 0.11,
+      });
+    else play(false);
+  }
+  return { unlock, play, cue, stop };
 }
