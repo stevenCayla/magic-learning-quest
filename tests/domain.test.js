@@ -1,11 +1,13 @@
 import test from 'node:test';
+import {
+  difficultyForAdventure,
+  freshAdventure,
+} from '../src/domain/adventures.js';
 import assert from 'node:assert/strict';
 import {
   generateMath,
   generateClock,
   validateAnswer,
-  tierFor,
-  clockLevel,
   timeLimit,
   integer,
   explanation,
@@ -18,7 +20,13 @@ import {
   scoreAnswer,
   recordAnswer,
 } from '../src/domain/progression.js';
-import { freshState, restore, load, save, SAVE_KEY } from '../src/domain/storage.js';
+import {
+  freshState,
+  restore,
+  load,
+  save,
+  SAVE_KEY,
+} from '../src/domain/storage.js';
 function seeded(seed) {
   return () => {
     seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
@@ -53,7 +61,10 @@ for (const tier of [0, 1, 2]) {
         assert.ok(validateAnswer(ex, String(ex.answer)));
         assert.equal(validateAnswer(ex, ex.answer + 1), false);
       }
-      assert.deepEqual(generateMath(tier, seeded(9), op), generateMath(tier, seeded(9), op));
+      assert.deepEqual(
+        generateMath(tier, seeded(9), op),
+        generateMath(tier, seeded(9), op),
+      );
     });
   }
 }
@@ -88,7 +99,12 @@ for (let l = 0; l <= 4; l++)
       assert.ok(ex.hour >= 1 && ex.hour <= 12);
       assert.ok(ex.minute >= 0 && ex.minute <= 59);
       assert.equal(ex.minute % [60, 30, 15, 5, 1][l], 0);
-      assert.ok(validateAnswer(ex, { hour: ex.hour, minute: String(ex.minute).padStart(2, '0') }));
+      assert.ok(
+        validateAnswer(ex, {
+          hour: ex.hour,
+          minute: String(ex.minute).padStart(2, '0'),
+        }),
+      );
       hours.add(ex.hour);
       mins.add(ex.minute);
     }
@@ -117,42 +133,85 @@ test('validation stricte, midi, minutes, saisies vides ou malformées', () => {
     assert.equal(validateAnswer(m, v), false);
 });
 test('progression pédagogique indépendante et options manuelles', () => {
+  const settings = { difficulty: 'auto', clockLevel: 'auto' };
   for (const [count, tier] of [
     [0, 0],
     [19, 0],
-    [20, 1],
-    [39, 1],
-    [40, 2],
-    [500, 2],
+    [20, 0],
+    [39, 0],
+    [40, 1],
+    [500, 1],
   ])
-    assert.equal(tierFor({ difficulty: 'auto' }, count), tier);
-  assert.equal(tierFor({ difficulty: 'easy' }, 900), 0);
-  assert.equal(tierFor({ difficulty: 'medium' }, 0), 1);
-  assert.equal(tierFor({ difficulty: 'advanced' }, 0), 2);
-  assert.equal(clockLevel({ clockLevel: 'auto' }, 9), 0);
-  assert.equal(clockLevel({ clockLevel: 'auto' }, 10), 1);
-  assert.equal(clockLevel({ clockLevel: 'auto' }, 100), 4);
-  assert.equal(clockLevel({ clockLevel: '3' }, 0), 3);
+    assert.equal(
+      difficultyForAdventure('math', settings, {
+        ...freshAdventure(),
+        cycleCorrect: count,
+      }).level,
+      tier,
+    );
+  for (const [difficulty, level] of [
+    ['easy', 0],
+    ['medium', 1],
+    ['advanced', 2],
+  ])
+    assert.equal(
+      difficultyForAdventure(
+        'math',
+        { ...settings, difficulty },
+        freshAdventure(),
+      ).level,
+      level,
+    );
+  for (const [count, level] of [
+    [0, 0],
+    [19, 0],
+    [20, 1],
+    [40, 2],
+    [60, 3],
+    [100, 3],
+  ])
+    assert.equal(
+      difficultyForAdventure('clock', settings, {
+        ...freshAdventure(),
+        cycleCorrect: count,
+      }).level,
+      level,
+    );
   assert.ok(timeLimit('clock', 0) > timeLimit('clock', 4));
   assert.ok(timeLimit('math', 0) > timeLimit('math', 2));
   assert.equal(timeLimit('clock', 4, true), 0);
 });
 test('score, XP, rapidité, séries et erreur non punitive', () => {
-  assert.deepEqual(scoreAnswer({ correct: false, elapsed: 1, limit: 30, streak: 8 }), {
-    xp: 0,
-    score: 0,
-    streak: 0,
-    fast: false,
-  });
-  assert.deepEqual(scoreAnswer({ correct: true, elapsed: 15, limit: 30, streak: 0 }), {
-    xp: 25,
-    score: 150,
-    streak: 1,
-    fast: true,
-  });
-  assert.equal(scoreAnswer({ correct: true, elapsed: 16, limit: 30, streak: 2 }).score, 120);
-  assert.equal(scoreAnswer({ correct: true, elapsed: 0, limit: 0, streak: 0 }).xp, 20);
-  assert.equal(scoreAnswer({ correct: true, elapsed: 2, limit: 30, streak: 999 }).score, 250);
+  assert.deepEqual(
+    scoreAnswer({ correct: false, elapsed: 1, limit: 30, streak: 8 }),
+    {
+      xp: 0,
+      score: 0,
+      streak: 0,
+      fast: false,
+    },
+  );
+  assert.deepEqual(
+    scoreAnswer({ correct: true, elapsed: 15, limit: 30, streak: 0 }),
+    {
+      xp: 25,
+      score: 150,
+      streak: 1,
+      fast: true,
+    },
+  );
+  assert.equal(
+    scoreAnswer({ correct: true, elapsed: 16, limit: 30, streak: 2 }).score,
+    120,
+  );
+  assert.equal(
+    scoreAnswer({ correct: true, elapsed: 0, limit: 0, streak: 0 }).xp,
+    20,
+  );
+  assert.equal(
+    scoreAnswer({ correct: true, elapsed: 2, limit: 30, streak: 999 }).score,
+    250,
+  );
 });
 test('20 étapes, frontières, récompenses, dragon et princesse', () => {
   assert.equal(STAGES.length, 20);
@@ -168,7 +227,7 @@ test('20 étapes, frontières, récompenses, dragon et princesse', () => {
   assert.equal(STAGES[position(1900)].name, 'Château de l’aurore');
   assert.ok(unlockedRewards(1900).includes('Couronne de l’aurore'));
 });
-test('les deux activités partagent la progression, sans mutation, et enregistrent les difficultés :35', () => {
+test('les deux activités ont leurs propres séries et enregistrent les difficultés :35', () => {
   let state = freshState();
   const original = structuredClone(state);
   for (let i = 0; i < 3; i++)
@@ -187,8 +246,12 @@ test('les deux activités partagent la progression, sans mutation, et enregistre
     ).state;
   assert.deepEqual(original, freshState());
   assert.equal(state.xp, 200);
-  assert.equal(state.streak, 8);
-  assert.equal(state.bestStreak, 8);
+  assert.equal(state.streak, 5);
+  assert.equal(state.adventures.clock.xp, 75);
+  assert.equal(state.adventures.math.xp, 125);
+  assert.equal(state.adventures.clock.streak, 3);
+  assert.equal(state.adventures.math.streak, 5);
+  assert.equal(state.bestStreak, 5);
   assert.equal(state.stats.clock.correct, 3);
   assert.equal(state.stats.math.correct, 5);
   assert.equal(state.history.length, 8);
@@ -201,13 +264,14 @@ test('les deux activités partagent la progression, sans mutation, et enregistre
   ).state;
   assert.equal(failed.xp, 200);
   assert.equal(failed.streak, 0);
-  assert.equal(failed.bestStreak, 8);
+  assert.equal(failed.bestStreak, 5);
   assert.equal(failed.stats.clock.buckets['minute:35'].wrong, 1);
   assert.equal(failed.history.at(-1).timedOut, true);
 });
 test('historique borné, progression finale et coffre annoncé une seule fois', () => {
   let s = freshState();
   s.xp = 75;
+  s.adventures.math.xp = 75;
   const ex = { mode: 'math', key: '×:0', tier: 0 };
   let r = recordAnswer(s, ex, { correct: true, elapsed: 1, limit: 30 });
   assert.equal(r.newStage, true);
@@ -230,10 +294,13 @@ test('sauvegarde/restauration, format versionné et stockage indisponible', () =
   s.settings.clockLevel = '4';
   s.settings.relaxed = true;
   const memory = new Map();
-  const store = { getItem: (k) => memory.get(k) ?? null, setItem: (k, v) => memory.set(k, v) };
+  const store = {
+    getItem: (k) => memory.get(k) ?? null,
+    setItem: (k, v) => memory.set(k, v),
+  };
   assert.ok(save(s, store));
   assert.deepEqual(load(store).state, s);
-  assert.equal(JSON.parse(memory.get(SAVE_KEY)).version, 1);
+  assert.equal(JSON.parse(memory.get(SAVE_KEY)).version, 2);
   assert.deepEqual(restore(null).state, freshState());
   for (const raw of [
     'bad',
@@ -264,7 +331,10 @@ test('correction pédagogique disponible pour chaque type', () => {
     assert.ok(explanation(generateMath(0, () => 0, op)).length > 15);
 });
 test('accès au stockage refusé dès la propriété localStorage', () => {
-  const descriptor = Object.getOwnPropertyDescriptor(globalThis, 'localStorage');
+  const descriptor = Object.getOwnPropertyDescriptor(
+    globalThis,
+    'localStorage',
+  );
   Object.defineProperty(globalThis, 'localStorage', {
     configurable: true,
     get() {
@@ -275,20 +345,26 @@ test('accès au stockage refusé dès la propriété localStorage', () => {
     assert.ok(load().warning);
     assert.equal(save(freshState()), false);
   } finally {
-    if (descriptor) Object.defineProperty(globalThis, 'localStorage', descriptor);
+    if (descriptor)
+      Object.defineProperty(globalThis, 'localStorage', descriptor);
     else delete globalThis.localStorage;
   }
 });
 test('préférence audio persistante et anciennes sauvegardes préservées', () => {
   const old = freshState();
   old.xp = 125;
+  old.version = 1;
+  delete old.adventures;
   delete old.settings.sound;
   const loaded = restore(JSON.stringify(old));
   assert.equal(loaded.warning, '');
   assert.equal(loaded.state.xp, 125);
   assert.equal(loaded.state.settings.sound, true);
   loaded.state.settings.sound = false;
-  assert.equal(restore(JSON.stringify(loaded.state)).state.settings.sound, false);
+  assert.equal(
+    restore(JSON.stringify(loaded.state)).state.settings.sound,
+    false,
+  );
   loaded.state.settings.sound = 'yes';
   assert.ok(restore(JSON.stringify(loaded.state)).warning);
 });

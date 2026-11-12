@@ -1,14 +1,14 @@
 import {
   generateClock,
   generateMath,
-  clockLevel,
-  tierFor,
   timeLimit,
   validateAnswer,
   explanation,
 } from '../../domain/exercises.js';
+import { adventureFor, difficultyForAdventure } from '../../domain/adventures.js';
 import { recordAnswer } from '../../domain/progression.js';
 import { encounter, DuelClock, SPELL_MS, avatarColor } from '../../domain/duel.js';
+import { openClockLesson } from '../clock-lesson.js';
 import { battleView } from './view.js';
 
 export function createBattleController({ getState, setState, render, onNavigate, sounds }) {
@@ -24,18 +24,25 @@ export function createBattleController({ getState, setState, render, onNavigate,
     ticker,
     lastCount = -1,
     impactPlayed = false,
-    rescue = false;
+    rescue = false,
+    lessonOpen = false;
   const phonePortrait = matchMedia('(max-width: 600px) and (orientation: portrait)');
-  const blocked = () => document.hidden || phonePortrait.matches || rescue;
+  const blocked = () => document.hidden || phonePortrait.matches || rescue || lessonOpen;
   const root = () => document.querySelector('.battle-shell');
   const valid = () =>
     mode === 'math'
       ? answer !== ''
-      : Number(hour) >= 1 && Number(hour) <= 12 && minute !== '' && Number(minute) <= 59;
+      : hour !== '' &&
+        Number(hour) >= 0 &&
+        Number(hour) <= 23 &&
+        minute !== '' &&
+        Number(minute) <= 59;
   function stop() {
     clearInterval(ticker);
     sounds.stop();
     mode = null;
+    lessonOpen = false;
+    document.querySelector('.clock-lesson')?.close();
     exercise = null;
     result = null;
     clock = null;
@@ -43,7 +50,7 @@ export function createBattleController({ getState, setState, render, onNavigate,
   function start(nextMode) {
     stop();
     mode = nextMode;
-    current = encounter(getState().xp);
+    current = encounter(adventureFor(getState(), mode).xp);
     clock = new DuelClock(performance.now());
     rescue = false;
     if (getState().settings.sound) void sounds.unlock();
@@ -52,12 +59,15 @@ export function createBattleController({ getState, setState, render, onNavigate,
   }
   function makeQuestion(retry = false) {
     const state = getState();
+    const progress = adventureFor(state, mode);
+    const difficulty = difficultyForAdventure(mode, state.settings, progress);
     if (!retry)
       exercise =
         mode === 'clock'
-          ? generateClock(clockLevel(state.settings, state.stats.clock.correct))
-          : generateMath(tierFor(state.settings, state.stats.math.correct));
-    exercise.limit = timeLimit(mode, exercise.level ?? exercise.tier, state.settings.relaxed);
+          ? generateClock(difficulty.level, Math.random, true)
+          : generateMath(difficulty.level, Math.random, undefined, difficulty.star);
+    const baseLimit = timeLimit(mode, exercise.level ?? exercise.tier, state.settings.relaxed);
+    exercise.limit = baseLimit ? Math.max(8, Math.round(baseLimit * difficulty.timeFactor)) : 0;
     answer = '';
     hour = '';
     minute = '';
@@ -65,18 +75,33 @@ export function createBattleController({ getState, setState, render, onNavigate,
     result = null;
     impactPlayed = false;
     lastCount = -1;
-    current = encounter(state.xp);
+    current = encounter(adventureFor(state, mode).xp);
     render(
       battleView({
         exercise,
         encounter: current,
         avatar: state.avatar,
-        xp: state.xp,
+        xp: progress.xp,
         sound: state.settings.sound,
       }),
     );
     if (clock.phase !== 'countdown') document.querySelector('.battle-go')?.remove();
     root().style.setProperty('--spell-color', avatarColor(state.avatar, 'wand'));
+    document.querySelector('#battle-lesson')?.addEventListener('click', () => {
+      lessonOpen = true;
+      sounds.stop();
+      clock.step(performance.now(), true);
+      syncOrientation();
+      openClockLesson({
+        onClose: () => {
+          lessonOpen = false;
+          if (!mode) return;
+          clock.step(performance.now(), false);
+          syncOrientation();
+          document.querySelector('#main').focus({ preventScroll: true });
+        },
+      });
+    });
     document.querySelector('#back').onclick = () => onNavigate('home');
     document.querySelector('#rotate-exit').onclick = () => onNavigate('home');
     document.querySelector('#toggle-sound').onclick = toggleSound;
@@ -123,7 +148,7 @@ export function createBattleController({ getState, setState, render, onNavigate,
               : value + k;
       if (field === 'hour') {
         hour = value;
-        if (/^\d$/.test(k) && (hour.length === 2 || Number(hour) > 1)) selectField('minute');
+        if (/^\d$/.test(k) && (hour.length === 2 || Number(hour) > 2)) selectField('minute');
       } else minute = value;
     }
     if (mode === 'math') document.querySelector('#math-answer').textContent = answer || '?';
@@ -145,9 +170,11 @@ export function createBattleController({ getState, setState, render, onNavigate,
         ? 'Prépare ta baguette…'
         : clock.phase === 'success'
           ? 'Bravo ! ✦'
-          : clock.phase === 'failure'
-            ? 'Recommencer ↻'
-            : 'Lancer mon sort ✦';
+          : clock.phase === 'failure-cast'
+            ? 'Le sorcier riposte…'
+            : clock.phase === 'failure'
+              ? 'Recommencer ↻'
+              : 'Lancer mon sort ✦';
     document.querySelector('#duel-intro').hidden = clock.phase !== 'countdown';
   }
   function syncOrientation() {
@@ -194,22 +221,29 @@ export function createBattleController({ getState, setState, render, onNavigate,
       document.querySelector('#timer').classList.toggle('urgent', left < 6);
       if (left === 0) submit(true);
     }
-    if (clock.phase === 'success') {
+    if (['success', 'failure-cast', 'failure'].includes(clock.phase) && result) {
       if (clock.spellMs >= 1000 && !impactPlayed) {
         impactPlayed = true;
-        if (getState().settings.sound) sounds.cue('impact');
+        if (getState().settings.sound)
+          sounds.cue(clock.phase === 'success' ? 'impact' : 'enemy-impact');
         const health = document.querySelector('#enemy-health');
-        health.value = Math.max(0, current.remaining - result.result.xp);
+        if (clock.phase === 'success')
+          health.value = Math.max(0, current.remaining - result.result.xp);
         document.querySelector('#enemy-health-text').textContent = `${health.value} / 100`;
         root().classList.add('spell-hit');
       }
-      if (clock.spellMs >= SPELL_MS) advance();
+      if (clock.phase === 'success' && clock.spellMs >= SPELL_MS) advance();
     }
   }
   function measureSpell() {
     if (!root()) return;
-    const from = document.querySelector('.fighter-player [data-wand-tip]')?.getBoundingClientRect();
-    const to = document.querySelector('.fighter-enemy .hit-target')?.getBoundingClientRect();
+    const reverse = clock?.phase?.startsWith('failure');
+    const from = document
+      .querySelector(reverse ? '.fighter-enemy [data-wand-tip]' : '.fighter-player [data-wand-tip]')
+      ?.getBoundingClientRect();
+    const to = document
+      .querySelector(reverse ? '.fighter-player .hit-target' : '.fighter-enemy .hit-target')
+      ?.getBoundingClientRect();
     const box = root().getBoundingClientRect();
     if (!from || !to) return;
     const x = from.x + from.width / 2 - box.x,
@@ -248,27 +282,39 @@ export function createBattleController({ getState, setState, render, onNavigate,
     setState(result.state);
     clock.result(correct, performance.now());
     syncPhase();
-    document.querySelector('[data-testid="xp"]').textContent = `${getState().xp} XP`;
+    document.querySelector('[data-testid="xp"]').textContent =
+      `${adventureFor(getState(), mode).xp} XP`;
     const feedback = document.querySelector('#feedback');
     feedback.className = `duel-feedback ${correct ? 'success' : 'retry'}`;
     feedback.innerHTML = correct
-      ? `<h3>Bravo !</h3><p><strong>+${result.result.xp} XP</strong> · +${result.result.score} points${result.result.fast ? ' · Sort éclair !' : ''}</p>${result.newStage ? `<p class="duel-unlock">${encounter(getState().xp).stage.name}${getState().xp >= 1900 ? ' · Aélis est délivrée !' : ''}</p>` : ''}${result.newRewards.length ? `<p class="duel-unlock">🎁 ${result.newRewards.join(', ')}</p>` : ''}`
+      ? `<h3>Bravo !</h3><p><strong>+${result.result.xp} XP</strong> · +${result.result.score} points${result.result.fast ? ' · Sort éclair !' : ''}</p>${result.newStage ? `<p class="duel-unlock">${result.starEarned ? `★ Étoile ${result.stars}/3 gagnée !` : encounter(adventureFor(getState(), mode).xp).stage.name}</p>` : ''}${result.newRewards.length ? `<p class="duel-unlock">🎁 ${result.newRewards.join(', ')}</p>` : ''}`
       : `<h3>${timedOut === true ? 'Le temps s’est envolé !' : 'Oups, c’est raté !'}</h3><p>${explanation(exercise)}</p><small>Le bon sort est à ta portée. Essaie encore !</small>`;
-    root().classList.add(correct ? 'is-casting' : 'spell-blocked');
+    if (correct) root().classList.add('is-casting');
+    else {
+      root().classList.add('spell-blocked', 'is-enemy-casting');
+      root().style.setProperty('--spell-color', current.enemy.accent);
+    }
     if (result.newStage) root().classList.add('enemy-defeated');
     measureSpell();
-    if (getState().settings.sound) sounds.cue(correct ? 'cast' : 'failure');
+    if (getState().settings.sound) sounds.cue(correct ? 'cast' : 'enemy-cast');
     document.querySelector('#main').focus({ preventScroll: true });
   }
   function advance() {
     const completed = result;
-    const destination = encounter(getState().xp);
-    if (current.index === 18 && destination.rescued) {
+    const destination = encounter(adventureFor(getState(), mode).xp);
+    if (completed.starEarned) {
       rescue = true;
       clock.phase = 'victory';
       root().dataset.phase = 'victory';
       const celebration = document.querySelector('.rescue-celebration');
       celebration.hidden = false;
+      celebration.querySelector('h2').textContent = `★ Étoile ${completed.stars}/3 gagnée !`;
+      celebration.querySelector('p').textContent = completed.completed
+        ? 'Tu as maîtrisé les trois étoiles de cette aventure !'
+        : `Bravo ! L’aventure ${mode === 'clock' ? 'Horloge' : 'Maths'} recommence au niveau 1 avec plus de difficulté.`;
+      document.querySelector('#rescue-continue').textContent = completed.completed
+        ? 'Continuer à s’entraîner'
+        : 'Repartir plus fort';
       document.querySelector('#rescue-continue').focus({ preventScroll: true });
       if (getState().settings.sound) sounds.play(true);
       return;
@@ -302,6 +348,7 @@ export function createBattleController({ getState, setState, render, onNavigate,
   document.addEventListener('keydown', (e) => {
     if (!mode || e.ctrlKey || e.metaKey || e.altKey || e.repeat || e.target.matches('input'))
       return;
+    if (lessonOpen) return;
     if (e.key === 'Escape') {
       onNavigate('home');
       return;

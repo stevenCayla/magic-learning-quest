@@ -1,3 +1,4 @@
+import { adventureFor, journeyFor, freshAdventure } from './adventures.js';
 export const STAGES = [
   ['Village des apprentis', '🏡', 'Ton premier pas vers la magie.', null],
   ['Forêt des lucioles', '🌲', 'Les lucioles éclairent ton chemin.', 'Baguette de noisetier'],
@@ -21,19 +22,21 @@ export const STAGES = [
   [
     'Château de l’aurore',
     '👑',
-    'Aélis est libre. Astréa retrouve sa lumière !',
+    'Le dernier dragon garde Aélis. Libère la princesse !',
     'Couronne de l’aurore',
   ],
 ].map(([name, icon, story, reward], index) => ({ name, icon, story, reward, index }));
 export const XP_PER_STAGE = 100;
 export function position(xp) {
-  return Math.min(19, Math.floor(Math.max(0, xp) / XP_PER_STAGE));
+  return journeyFor(xp).stageIndex;
 }
 export function level(xp) {
-  return 1 + Math.floor(Math.max(0, xp) / 100);
+  return journeyFor(xp).level;
 }
 export function unlockedRewards(xp) {
-  return STAGES.filter((s) => s.reward && s.index <= position(xp)).map((s) => s.reward);
+  return STAGES.filter((s) => s.reward && (xp >= 2000 || s.index <= position(xp))).map(
+    (s) => s.reward,
+  );
 }
 export function scoreAnswer({ correct, elapsed, limit, streak }) {
   if (!correct) return { xp: 0, score: 0, streak: 0, fast: false };
@@ -53,13 +56,32 @@ export function recordAnswer(
   { correct, elapsed, limit, timedOut = false },
   now = Date.now(),
 ) {
-  const result = scoreAnswer({ correct, elapsed, limit, streak: state.streak });
+  const previous = adventureFor(state, exercise.mode);
+  const before = journeyFor(previous.xp);
+  const result = scoreAnswer({ correct, elapsed, limit, streak: previous.streak });
   const next = structuredClone(state);
-  next.xp += result.xp;
-  next.score += result.score;
-  next.streak = result.streak;
-  next.bestStreak = Math.max(next.bestStreak, result.streak);
-  next.rewards = unlockedRewards(next.xp);
+  next.adventures ??= { clock: freshAdventure(), math: freshAdventure() };
+  const progress = next.adventures[exercise.mode];
+  progress.xp = previous.xp + result.xp;
+  progress.score = previous.score + result.score;
+  progress.streak = result.streak;
+  progress.bestStreak = Math.max(previous.bestStreak, result.streak);
+  const after = journeyFor(progress.xp);
+  const starEarned = after.stars > before.stars;
+  progress.cycleCorrect = starEarned ? 0 : previous.cycleCorrect + Number(correct);
+  progress.rewards = unlockedRewards(progress.xp);
+  next.xp = next.adventures.clock.xp + next.adventures.math.xp;
+  next.unlocksXP = Math.max(next.unlocksXP ?? 0, next.xp);
+  next.score = next.adventures.clock.score + next.adventures.math.score;
+  next.streak = progress.streak;
+  next.bestStreak = Math.max(next.adventures.clock.bestStreak, next.adventures.math.bestStreak);
+  next.rewards = [
+    ...new Set([
+      ...(next.legacyRewards ?? []),
+      ...next.adventures.clock.rewards,
+      ...next.adventures.math.rewards,
+    ]),
+  ];
   const stats = next.stats[exercise.mode];
   stats[correct ? 'correct' : 'wrong']++;
   stats.totalMs += Math.round(Math.max(0, elapsed) * 1000);
@@ -74,12 +96,16 @@ export function recordAnswer(
     timedOut,
     at: now,
     difficulty: exercise.tier ?? exercise.level,
+    star: before.targetStar,
   });
   next.history = next.history.slice(-500);
   return {
     state: next,
     result,
-    newRewards: next.rewards.filter((r) => !state.rewards.includes(r)),
-    newStage: position(next.xp) > position(state.xp),
+    newRewards: progress.rewards.filter((r) => !previous.rewards.includes(r)),
+    newStage: starEarned || after.stageIndex > before.stageIndex,
+    starEarned,
+    stars: after.stars,
+    completed: after.complete,
   };
 }

@@ -1,19 +1,28 @@
+import { freshAdventure } from './adventures.js';
 import { DEFAULT_AVATAR, normalizeAvatar } from './duel.js';
 import { DIFFICULTIES } from './exercises.js';
 import { unlockedRewards } from './progression.js';
 export const SAVE_KEY = 'astrea.save';
-export const SAVE_VERSION = 1;
+export const SAVE_VERSION = 2;
 const stats = () => ({ correct: 0, wrong: 0, totalMs: 0, buckets: {} });
 export function freshState() {
   return {
     version: SAVE_VERSION,
     xp: 0,
+    unlocksXP: 0,
     score: 0,
     streak: 0,
     bestStreak: 0,
     rewards: [],
+    legacyRewards: [],
+    adventures: { clock: freshAdventure(), math: freshAdventure() },
     avatar: { ...DEFAULT_AVATAR },
-    settings: { difficulty: 'auto', clockLevel: 'auto', relaxed: false, sound: true },
+    settings: {
+      difficulty: 'auto',
+      clockLevel: 'auto',
+      relaxed: false,
+      sound: true,
+    },
     stats: { clock: stats(), math: stats() },
     history: [],
   };
@@ -22,10 +31,12 @@ const natural = (x) => Number.isSafeInteger(x) && x >= 0;
 export function restore(raw) {
   try {
     const data = JSON.parse(raw);
-    if (!data || data.version !== SAVE_VERSION)
+    if (!data || ![1, SAVE_VERSION].includes(data.version))
       return {
         state: freshState(),
-        warning: raw ? 'Sauvegarde incompatible. Une nouvelle aventure est prête.' : '',
+        warning: raw
+          ? 'Sauvegarde incompatible. Une nouvelle aventure est prête.'
+          : '',
       };
     const base = freshState();
     for (const key of ['xp', 'score', 'streak', 'bestStreak'])
@@ -33,9 +44,12 @@ export function restore(raw) {
       else base[key] = data[key];
     if (
       !DIFFICULTIES.includes(data.settings?.difficulty) ||
-      !['auto', '0', '1', '2', '3', '4'].includes(String(data.settings?.clockLevel)) ||
+      !['auto', '0', '1', '2', '3', '4'].includes(
+        String(data.settings?.clockLevel),
+      ) ||
       typeof data.settings?.relaxed !== 'boolean' ||
-      (data.settings.sound !== undefined && typeof data.settings.sound !== 'boolean')
+      (data.settings.sound !== undefined &&
+        typeof data.settings.sound !== 'boolean')
     )
       throw new Error('Invalid settings');
     base.settings = {
@@ -62,7 +76,11 @@ export function restore(raw) {
           !['correct', 'wrong', 'totalMs'].every((k) => natural(value[k]))
         )
           throw new Error('Invalid bucket');
-        buckets[key] = { correct: value.correct, wrong: value.wrong, totalMs: value.totalMs };
+        buckets[key] = {
+          correct: value.correct,
+          wrong: value.wrong,
+          totalMs: value.totalMs,
+        };
       }
       base.stats[mode] = {
         correct: source.correct,
@@ -71,8 +89,75 @@ export function restore(raw) {
         buckets,
       };
     }
-    base.avatar = normalizeAvatar(data.avatar, base.xp);
-    base.rewards = unlockedRewards(base.xp);
+    if (data.version === 1) {
+      const count = base.stats.clock.correct + base.stats.math.correct;
+      const clockShare = count ? base.stats.clock.correct / count : 1;
+      for (const mode of ['clock', 'math']) {
+        const xp =
+          mode === 'clock'
+            ? Math.floor(base.xp * clockShare)
+            : base.xp - Math.floor(base.xp * clockShare);
+        const score =
+          mode === 'clock'
+            ? Math.floor(base.score * clockShare)
+            : base.score - Math.floor(base.score * clockShare);
+        const lastMode = Array.isArray(data.history)
+          ? data.history.at(-1)?.mode
+          : 'clock';
+        base.adventures[mode] = {
+          ...freshAdventure(),
+          xp,
+          score,
+          streak: mode === (lastMode ?? 'clock') ? base.streak : 0,
+          bestStreak: mode === (lastMode ?? 'clock') ? base.bestStreak : 0,
+          cycleCorrect: xp
+            ? Math.floor((base.stats[mode].correct * (xp % 2000)) / xp)
+            : 0,
+          rewards: unlockedRewards(xp),
+        };
+      }
+      base.legacyRewards = unlockedRewards(base.xp);
+    } else {
+      for (const mode of ['clock', 'math']) {
+        const source = data.adventures?.[mode];
+        if (
+          !source ||
+          !['xp', 'score', 'streak', 'bestStreak', 'cycleCorrect'].every((k) =>
+            natural(source[k]),
+          )
+        )
+          throw new Error('Invalid adventure');
+        base.adventures[mode] = {
+          ...freshAdventure(),
+          ...Object.fromEntries(
+            ['xp', 'score', 'streak', 'bestStreak', 'cycleCorrect'].map((k) => [
+              k,
+              source[k],
+            ]),
+          ),
+          rewards: unlockedRewards(source.xp),
+        };
+      }
+      base.legacyRewards = Array.isArray(data.legacyRewards)
+        ? data.legacyRewards.filter((r) => unlockedRewards(6000).includes(r))
+        : [];
+      base.xp = base.adventures.clock.xp + base.adventures.math.xp;
+      base.score = base.adventures.clock.score + base.adventures.math.score;
+    }
+    if (!natural(base.xp) || !natural(base.score))
+      throw new Error('Invalid aggregate');
+    base.unlocksXP = Math.max(
+      base.xp,
+      natural(data.unlocksXP) ? data.unlocksXP : 0,
+    );
+    base.avatar = normalizeAvatar(data.avatar, base.unlocksXP);
+    base.rewards = [
+      ...new Set([
+        ...base.legacyRewards,
+        ...base.adventures.clock.rewards,
+        ...base.adventures.math.rewards,
+      ]),
+    ];
     base.history = Array.isArray(data.history)
       ? data.history
           .filter(
@@ -85,7 +170,11 @@ export function restore(raw) {
           )
           .slice(-500)
       : [];
-    return { state: base, warning: '' };
+    return {
+      state: base,
+      warning: '',
+      ...(data.version === 1 ? { migrated: true } : {}),
+    };
   } catch {
     return {
       state: freshState(),
@@ -95,11 +184,25 @@ export function restore(raw) {
 }
 export function load(storage) {
   try {
-    return restore((storage ?? localStorage).getItem(SAVE_KEY));
+    const target = storage ?? localStorage;
+    const raw = target.getItem(SAVE_KEY);
+    const result = restore(raw);
+    if (result.migrated) {
+      try {
+        if (!target.getItem(`${SAVE_KEY}.v1.backup`))
+          target.setItem(`${SAVE_KEY}.v1.backup`, raw);
+        target.setItem(SAVE_KEY, JSON.stringify(result.state));
+      } catch {
+        result.warning =
+          'La nouvelle sauvegarde est prête en mémoire mais ne peut pas être enregistrée. Garde la page ouverte.';
+      }
+    }
+    return result;
   } catch {
     return {
       state: freshState(),
-      warning: 'Le stockage est indisponible. Garde cette page ouverte pour conserver ta partie.',
+      warning:
+        'Le stockage est indisponible. Garde cette page ouverte pour conserver ta partie.',
     };
   }
 }
