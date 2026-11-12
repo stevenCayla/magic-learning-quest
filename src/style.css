@@ -589,6 +589,7 @@ main {
   top: 10px;
 }
 .toast {
+  pointer-events: none;
   position: fixed;
   bottom: 30px;
   left: 50%;
