@@ -3,8 +3,20 @@ export const LEVEL_XP = 100;
 export const LEVELS_PER_STAR = 20;
 export const XP_PER_STAR = LEVEL_XP * LEVELS_PER_STAR;
 export const MAX_STARS = 3;
+export const MAX_HEALTH = 100;
+export const ENEMY_DAMAGE = 25;
 export function freshAdventure() {
-  return { xp: 0, score: 0, streak: 0, bestStreak: 0, cycleCorrect: 0, rewards: [] };
+  return {
+    xp: 0,
+    score: 0,
+    streak: 0,
+    bestStreak: 0,
+    cycleCorrect: 0,
+    levelStartCorrect: 0,
+    health: MAX_HEALTH,
+    defeats: 0,
+    rewards: [],
+  };
 }
 export function journeyFor(xp = 0) {
   const total = Math.max(0, Number.isFinite(xp) ? Math.floor(xp) : 0);
@@ -81,5 +93,21 @@ export function resetAdventure(state, mode) {
       ...next.adventures.math.rewards,
     ]),
   ];
+  return next;
+}
+
+// A defeat resets only the unfinished level, never a previous level or earned star.
+export function restartLevel(state, mode) {
+  if (!ADVENTURE_MODES.includes(mode)) throw new Error('Aventure inconnue');
+  const previous = adventureFor(state, mode);
+  if (previous.health !== 0) throw new Error('Le duel n’est pas perdu');
+  const next = structuredClone(state);
+  const progress = next.adventures[mode];
+  progress.xp -= progress.xp % LEVEL_XP;
+  progress.cycleCorrect = progress.levelStartCorrect;
+  progress.health = MAX_HEALTH;
+  progress.streak = 0;
+  next.xp = next.adventures.clock.xp + next.adventures.math.xp;
+  next.streak = 0;
   return next;
 }

@@ -1,4 +1,10 @@
-import { adventureFor, journeyFor, freshAdventure } from './adventures.js';
+import {
+  adventureFor,
+  journeyFor,
+  freshAdventure,
+  MAX_HEALTH,
+  ENEMY_DAMAGE,
+} from './adventures.js';
 export const STAGES = [
   ['Village des apprentis', '🏡', 'Ton premier pas vers la magie.', null],
   ['Forêt des lucioles', '🌲', 'Les lucioles éclairent ton chemin.', 'Baguette de noisetier'],
@@ -25,7 +31,13 @@ export const STAGES = [
     'Le dernier dragon garde Aélis. Libère la princesse !',
     'Couronne de l’aurore',
   ],
-].map(([name, icon, story, reward], index) => ({ name, icon, story, reward, index }));
+].map(([name, icon, story, reward], index) => ({
+  name,
+  icon,
+  story,
+  reward,
+  index,
+}));
 export const XP_PER_STAGE = 100;
 export function position(xp) {
   return journeyFor(xp).stageIndex;
@@ -57,8 +69,14 @@ export function recordAnswer(
   now = Date.now(),
 ) {
   const previous = adventureFor(state, exercise.mode);
+  if (previous.health === 0) throw new Error('Recommence le niveau avant de répondre');
   const before = journeyFor(previous.xp);
-  const result = scoreAnswer({ correct, elapsed, limit, streak: previous.streak });
+  const result = scoreAnswer({
+    correct,
+    elapsed,
+    limit,
+    streak: previous.streak,
+  });
   const next = structuredClone(state);
   next.adventures ??= { clock: freshAdventure(), math: freshAdventure() };
   const progress = next.adventures[exercise.mode];
@@ -68,7 +86,21 @@ export function recordAnswer(
   progress.bestStreak = Math.max(previous.bestStreak, result.streak);
   const after = journeyFor(progress.xp);
   const starEarned = after.stars > before.stars;
+
+  const newStage = starEarned || after.stageIndex > before.stageIndex;
+  const levelWon = Math.floor(progress.xp / XP_PER_STAGE) > Math.floor(previous.xp / XP_PER_STAGE);
   progress.cycleCorrect = starEarned ? 0 : previous.cycleCorrect + Number(correct);
+  progress.health = correct
+    ? levelWon
+      ? MAX_HEALTH
+      : (previous.health ?? MAX_HEALTH)
+    : Math.max(0, (previous.health ?? MAX_HEALTH) - ENEMY_DAMAGE);
+  progress.levelStartCorrect = levelWon
+    ? progress.cycleCorrect
+    : (previous.levelStartCorrect ?? previous.cycleCorrect);
+  const defeated = progress.health === 0;
+  progress.defeats = (previous.defeats ?? 0) + Number(defeated);
+
   progress.rewards = unlockedRewards(progress.xp);
   next.xp = next.adventures.clock.xp + next.adventures.math.xp;
   next.unlocksXP = Math.max(next.unlocksXP ?? 0, next.xp);
@@ -103,7 +135,9 @@ export function recordAnswer(
     state: next,
     result,
     newRewards: progress.rewards.filter((r) => !previous.rewards.includes(r)),
-    newStage: starEarned || after.stageIndex > before.stageIndex,
+    newStage,
+    defeated,
+    health: progress.health,
     starEarned,
     stars: after.stars,
     completed: after.complete,

@@ -148,17 +148,17 @@ body,
     margin-top: 13px;
   }
   .is-home .arcade-heroes {
-    background-size: 100% auto;
-    background-position: center center;
+    inset: auto 0;
+    top: 50%;
+    aspect-ratio: 2 / 3;
+    transform: translateY(-50%);
+    background-size: 100% 100%;
+    background-position: center top;
+    -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 32%);
+    mask-image: linear-gradient(180deg, transparent 0%, #000 32%);
   }
   .is-home .arcade-home::after {
-    background: linear-gradient(
-      180deg,
-      #20174022,
-      transparent 40%,
-      #171224cf 75%,
-      #171224
-    );
+    background: linear-gradient(180deg, transparent, transparent 40%, #171224cf 75%, #171224);
   }
   .is-home .arcade-home-bottom {
     width: 100%;
@@ -544,5 +544,52 @@ body,
     height: 44px;
     margin-top: 4px;
     line-height: 1.15;
+  }
+}
+
+/* Player health mirrors the enemy bar and remains legible on short screens. */
+.fighter-player progress::-webkit-progress-value {
+  background: linear-gradient(90deg, #31b9a1, #b0f5b7);
+}
+.fighter-player progress::-moz-progress-bar {
+  background: #6fdfac;
+}
+.player-critical .fighter-player progress::-webkit-progress-value {
+  background: #ff837d;
+}
+.player-critical .fighter-player progress::-moz-progress-bar {
+  background: #ff837d;
+}
+.player-critical #player-health-text {
+  color: #ffb4a9;
+  font-weight: 800;
+}
+.player-defeated .fighter-player .fighter-portrait {
+  opacity: 0.55;
+}
+@media (prefers-reduced-motion: reduce) {
+  .fighter progress::-webkit-progress-value {
+    transition: none;
+  }
+}
+/* Fade the actual illustration edges into the sky on wide screens too. */
+@media (min-width: 851px) {
+  .arcade-heroes {
+    inset: 0 auto;
+    left: 50%;
+    height: 100%;
+    width: auto;
+    max-width: 100%;
+    aspect-ratio: 2 / 3;
+    transform: translateX(-50%);
+    background-size: 100% 100%;
+    -webkit-mask-image:
+      linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent),
+      linear-gradient(180deg, transparent 14%, #000 38%);
+    mask-image:
+      linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent),
+      linear-gradient(180deg, transparent 14%, #000 38%);
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
   }
 }
