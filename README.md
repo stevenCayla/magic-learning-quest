@@ -1,12 +1,12 @@
 # Magic Learning Quest · L’Académie d’Astréa
 
-Une PWA éducative en français pour les 8–10 ans : lire une horloge analogique et calculer de tête pour traverser un monde magique original, affronter le dragon d’ombre et délivrer la princesse Aélis. Les deux entraînements alimentent **une seule aventure**, sauvegardée sur l’appareil.
+Une PWA éducative en français pour les 8–10 ans : lire une horloge analogique et calculer de tête pour traverser un monde magique original, affronter le dragon d’ombre et délivrer la princesse Aélis. Les deux entraînements proposent **deux aventures indépendantes**, chacune avec 20 niveaux et trois étoiles, sauvegardées sur l’appareil.
 
 Application publiée sur GitHub Pages : **https://stevencayla.github.io/magic-learning-quest/**.
 
 ## Jouer
 
-L’accueil s’adapte aussi au paysage pour permettre de changer d’entraînement sans faire défiler la page. Il ne comporte pas de navigation basse : la roue dentée en haut à droite ouvre les réglages et la personnalisation. Le grimoire reste accessible depuis l’aventure.
+Sur téléphone, l’accueil tient dans la hauteur disponible, sans défilement, et se consulte uniquement en portrait. En paysage, une invitation demande de tourner le téléphone à la verticale. Il ne comporte pas de navigation basse : la roue dentée en haut à droite ouvre les réglages et la personnalisation. Le grimoire reste accessible depuis l’aventure.
 
 Depuis l’accueil, choisir **Horloge magique** ou **Maths magiques**. Utiliser les grandes touches du pavé ou les chiffres du clavier, puis **Lancer mon sort**. Pour l’horloge, toucher le champ heures ou minutes pour le modifier. Le champ minutes s’active automatiquement après une heure complète ; une heure à un chiffre comme 1 peut être saisie `01` ou en touchant ensuite le champ minutes. `C` efface le champ actif, `⌫` retire son dernier chiffre. `Tab` permet de parcourir les commandes et `Entrée` active le bouton sélectionné. `Échap` revient au menu.
 
@@ -14,11 +14,13 @@ Sur téléphone, les deux entraînements se jouent **en paysage**. En portrait, 
 
 Chaque entrée dans un duel et chaque nouvelle étape commencent par **5 → 4 → 3 → 2 → 1 → COMBAT !**, avec chiffres lumineux, anneaux d’énergie et sons originaux. Les questions sont masquées et le chrono pédagogique ne démarre qu’après ces cinq secondes. Il n’y a pas de nouveau décompte entre les questions du même combat ni lors d’un réessai.
 
-Une bonne réponse affiche immédiatement Bravo, XP et points : le mage arme sa baguette, charge sa pointe et lance un projectile à traînée lumineuse vers l’adversaire. L’impact, les éclats et le son réduisent son énergie, puis l’exercice suivant arrive automatiquement après la séquence de **1,8 seconde**. Une erreur ou une expiration conserve les XP, affiche la correction et un contresort doux ; **Recommencer** réessaie la même question sans refaire l’introduction. Le mode découverte désactive le chrono pédagogique et les bonus de rapidité, tout en conservant le décompte de présentation.
+Une bonne réponse affiche immédiatement Bravo, XP et points : le mage arme sa baguette, charge sa pointe et lance un projectile à traînée lumineuse vers l’adversaire. L’impact, les éclats et le son réduisent son énergie, puis l’exercice suivant arrive automatiquement après la séquence de **1,8 seconde**. Une erreur ou une expiration conserve les XP, affiche immédiatement la correction puis anime la baguette, le projectile et l’impact du **sorcier adverse vers le joueur**, avec un son distinct ; après cette riposte de 1,8 seconde, **Recommencer** réessaie la même question sans refaire l’introduction. Le mode découverte désactive le chrono pédagogique et les bonus de rapidité, tout en conservant le décompte de présentation.
 
 Le décompte, le chrono et la transition sont suspendus en portrait ou en arrière-plan. Quitter l’épreuve annule les effets et transitions. Les effets et sons sont entièrement originaux : l’inspiration arcade ne reprend aucun asset ni son de Sky Force Reloaded.
 
-Dans **Aventure**, suivre les 20 étapes. Les coffres s’ouvrent automatiquement à leur arrivée, les objets apparaissent dans le **Grimoire**. Le combat final utilise les mêmes exercices : de 1 800 à 1 900 XP, chaque réussite dissipe l’ombre du dragon ; à 1 900 XP, la princesse est délivrée. Une scène de victoire montre Aélis délivrée. L’entraînement peut continuer ensuite avec le dragon de lumière.
+Dans **Mes aventures**, choisir Horloge ou Maths : XP, score, séries, coffres et position sont propres à l’aventure choisie. Il faut terminer les **20 niveaux (2 000 XP)** pour vaincre le dragon, délivrer Aélis et gagner une étoile. L’aventure repart alors au niveau 1 avec une difficulté accrue. Les étoiles se gagnent à **2 000, 4 000 et 6 000 XP**, séparément pour chaque activité. Après trois étoiles, l’entraînement peut continuer au dernier niveau sans quatrième étoile.
+
+**Relire la leçon** est disponible dans l’aventure Horloge et via le bouton livre pendant un duel. Ce grimoire reprend les aiguilles, les graduations, les conversions matin/après-midi, midi/minuit et le déplacement continu de la petite aiguille. Une horloge manipulable et quatre exemples permettent de revoir les notions à son rythme. Ouvrir la leçon suspend le décompte, le chrono et l’animation ; la fermer reprend la même question.
 
 ## Stack et architecture
 
@@ -28,6 +30,7 @@ JavaScript ES modules, HTML sémantique, CSS responsive et Vite. Aucun framework
 src/
   domain/
     exercises.js    # Générateurs injectables, validation stricte, paliers, chrono
+    adventures.js   # Deux parcours, cycles de 20 niveaux, étoiles et remise à zéro
     progression.js  # Score, XP, séries, étapes, récompenses et statistiques
     duel.js         # Rencontres, horloge de combat pure et personnalisation normalisée
     storage.js      # Sauvegarde versionnée, validation et restauration
@@ -37,6 +40,9 @@ src/
     characters.js   # Mages, dragon et princesse en SVG originaux
     scenes.js       # 20 décors en lien avec les étapes
     battle.css      # Arène paysage, animation de baguette, vol et impact
+  ui/clock-lesson.js # Leçon illustrée et horloge manipulable
+  ui/adventure-settings.js # Confirmation de remise à zéro ciblée
+  ui/zoom-guard.js  # Gestes de zoom et raccourcis
   ui/customize.js   # Choix du personnage et aperçu
   ui/sound.js       # Carillons Web Audio originaux, utilisables hors connexion
   ui/clock.js       # Rendu SVG de l’horloge (position réelle des deux aiguilles)
@@ -51,6 +57,7 @@ public/
 scripts/build-sw.js # Génère le service worker et son précache depuis le build
 tests/
   domain.test.js    # Tests métier Node sans DOM
+  adventures.test.js # Étoiles, indépendance, progression, migrations et remise à zéro
   duel.test.js      # Temps de combat, pauses, énergie, accessoires et anciens formats
   e2e/app.spec.js   # Parcours Playwright, responsive et PWA
 .github/workflows/ci-pages.yml
@@ -90,34 +97,34 @@ Ouvrir `http://localhost:4173/magic-learning-quest/`. Tester la PWA sur ce build
 
 ## Progression pédagogique et récompenses
 
-- **Heure** : heures pleines → demi-heures → quarts → pas de 5 minutes → toutes les minutes. Un palier toutes les 10 bonnes réponses d’horloge. L’heure est au format 1–12, sans ambiguïté matin/soir. La petite aiguille avance avec les minutes.
-- **Maths faciles** : sommes jusqu’à 20, soustractions sans négatif, tables de 2, 5 et 10, multiplicateur 1–10.
-- **Intermédiaire** : sommes et soustractions jusqu’à 100, tables de 2, 3, 4, 5, 6, 8 et 10.
-- **Avancé** : sommes et soustractions jusqu’à 500, tables de 2 à 12, multiplicateur 1–12. Les trois niveaux conservent des soustractions sans résultat négatif.
-- **Automatique** : les maths passent au niveau suivant après 20 puis 40 réussites en maths. Chaque activité a son compteur de maîtrise, indépendant des XP communs. Les réglages manuels permettent de reprendre les bases ou d’augmenter le défi.
-- **Chrono** : horloge 40/35/30/25/20 secondes ; maths 30/24/18 secondes. Bonne réponse = 20 XP et 100 points. Dans la première moitié du temps = +5 XP et +50 points. Une série ajoute des points bonus tous les 3 succès, plafonnés à 100. Erreur ou expiration = 0 XP et série réinitialisée, sans perte de score ni trésors.
-- **Aventure** : 100 XP par étape, niveau de mage +1 tous les 100 XP, 20 étapes et 13 récompenses. Les gardiens intermédiaires et le dragon sont traversés grâce aux exercices communs ; pas de mini-jeu non éducatif qui bloque la progression.
-
+- **Horloge, dès la première étoile** : chaque question indique **Matin** ou **Après-midi**. La réponse doit respecter le format 24 h : 3 h 15 l’après-midi → `15:15` ; minuit → `00:00`, midi → `12:00`. La petite aiguille avance avec les minutes.
+- **Étoile 1, Horloge automatique** : heures pleines → demi-heures → quarts → pas de 5 minutes, avec un palier toutes les 20 réussites du cycle. **Étoile 2** : pas de 5 minutes, puis toutes les minutes après 20 réussites. **Étoile 3** : toutes les minutes avec un chrono plus court.
+- **Maths étoile 1** : additions jusqu’à 20, soustractions sans négatif, tables ×2/×5/×10 ; après 40 réussites, opérations jusqu’à 100 et davantage de tables. **Étoile 2** : plafond intermédiaire 150, tables supplémentaires, puis niveau avancé jusqu’à 750. **Étoile 3** : opérations jusqu’à 1 000 et tables de 2 à 12. Le multiplicateur maximal des tables avancées est 12.
+- **Réglages** : le choix manuel peut augmenter le défi, tout en conservant le minimum correspondant à l’étoile. Revenir sur Facile à la troisième étoile ne remet donc pas les exercices au niveau débutant. Le mode découverte retire le chrono, mais la complexité augmente toujours à chaque étoile.
+- **Chrono** : base horloge 40/35/30/25/20 secondes ; maths 30/24/18 secondes. Facteurs par étoile : 100 %, 80 %, 65 %, puis réduction de 1 % par niveau à l’intérieur du cycle ; minimum 8 secondes. Bonne réponse = 20 XP et 100 points. Dans la première moitié du temps = +5 XP et +50 points. Les séries propres à chaque aventure ajoutent des points, plafonnés à 100. Une erreur remet seulement la série de cette aventure à zéro, sans perte d’XP, de score ou de trésors.
+- **Aventure** : 100 XP par niveau, 20 niveaux par étoile, trois étoiles par activité. Les réussites infligent 20 ou 25 dégâts, égaux aux XP attribués. Les objets d’un parcours restent acquis lorsqu’il recommence à l’étoile suivante.
 
 ## Personnage et adversaires
 
-Dans les réglages : nom, teint, couleur et forme des cheveux, expression/lunettes, tenue, chapeau et baguette. L’aperçu et le combattant utilisent le même SVG. Les choix sont sauvegardés dans `avatar` au format V1 ; les valeurs inconnues sont normalisées sans invalider toute la progression. Baguette Soleil : 400 XP ; tenue Aurore : 1 200 XP ; couronne : 1 900 XP.
+Dans les réglages : nom, teint, couleur et forme des cheveux, expression/lunettes, tenue, chapeau et baguette. L’aperçu et le combattant utilisent le même SVG. Les choix sont sauvegardés dans `avatar` au format V2 ; les valeurs inconnues sont normalisées sans invalider toute la progression. Baguette Soleil : 400 XP ; tenue Aurore : 1 200 XP ; couronne : 1 900 XP.
 
-Les 18 premières étapes ont chacune leur sorcier adverse, avec nom, silhouette/accessoire, visage, couleur et signature magique propres. La 19e est le dragon d’ombre ; la 20e est le château libéré, avec entraînement libre contre un dragon de lumière. Chacun des 20 décors possède un lieu distinct : village, forêt, pont, griffon, bibliothèque, jardin, potions, golem, lac, tour, nuages, phénix, étoiles, cristaux, crypte, trésor, vallée, remparts, antre et château. Les SVG sont intégrés au build, donc disponibles hors connexion.
+Les 18 premières étapes ont chacune leur sorcier adverse, avec nom, silhouette/accessoire, visage, couleur et signature magique propres. La 19e est le dragon d’ombre ; la 20e est la bataille finale contre le dragon du château pour délivrer Aélis. Chacun des 20 décors possède un lieu distinct : village, forêt, pont, griffon, bibliothèque, jardin, potions, golem, lac, tour, nuages, phénix, étoiles, cristaux, crypte, trésor, vallée, remparts, antre et château. Les SVG sont intégrés au build, donc disponibles hors connexion.
 
-L’énergie adverse est dérivée de `100 - (XP % 100)` : Horloge et Maths partagent exactement le même combat et une sauvegarde ancienne le restaure sans compteur supplémentaire. Une réussite fait 20 ou 25 dégâts, égaux aux XP attribués. Les statistiques d’apprentissage et les paliers restent indépendants du décor et des adversaires. Recharger reprend la progression et le personnage, avec un nouveau décompte et une nouvelle question ; la saisie inachevée n’est pas conservée.
+L’énergie adverse est dérivée de `100 - (XP % 100)` : elle est calculée depuis les XP de l’aventure en cours. Gagner des XP en Maths ne change ni l’énergie ni la position du parcours Horloge, et inversement. Une réussite fait 20 ou 25 dégâts, égaux aux XP attribués. Les statistiques d’apprentissage et les paliers restent indépendants du décor et des adversaires. Recharger reprend la progression et le personnage, avec un nouveau décompte et une nouvelle question ; la saisie inachevée n’est pas conservée.
 
 ## Sauvegarde et statistiques
 
-`localStorage['astrea.save']`, format **version 1**. Écriture après chaque réponse et chaque réglage. Restauration validée au démarrage, récompenses recalculées depuis les XP. Si le format est corrompu/incompatible, une alerte apparaît et une nouvelle partie en mémoire est proposée. Si le stockage est bloqué ou plein, l’application signale que la sauvegarde n’a pas réussi. Éviter de fermer dans ce cas.
+`localStorage['astrea.save']`, format **version 2**, avec deux enregistrements `adventures.clock` et `adventures.math`. Écriture après chaque réponse et chaque réglage. Restauration validée au démarrage, récompenses recalculées depuis les XP. Si le format est corrompu/incompatible, une alerte apparaît et une nouvelle partie en mémoire est proposée. Si le stockage est bloqué ou plein, l’application signale que la sauvegarde n’a pas réussi. Éviter de fermer dans ce cas.
 
 Les sons magiques sont synthétisés localement via Web Audio (carillon de victoire et son doux pour réessayer), sans téléchargement. Le son est activé depuis un geste utilisateur pour respecter les contraintes iPhone ; il se coupe dans l’exercice ou les réglages. La préférence est conservée, et les anciennes sauvegardes restent compatibles. Les bips du décompte, l’annonce de départ, la montée du sort et l’impact ont des timbres et hauteurs distincts. Les particules et mouvements sont désactivés avec `prefers-reduced-motion`. Le passage automatique est annulé en quittant l’exercice et suspendu en arrière-plan. Les coffres et changements d’étape restent annoncés après le passage au sort suivant.
 
-La fonction `restore` centralise le point d’entrée des futures migrations de version. Les sauvegardes V1 antérieures à la personnalisation reçoivent un avatar par défaut sans perte de progression ; une version future inconnue n’est pas interprétée silencieusement.
+La fonction `restore` migre automatiquement les anciennes sauvegardes V1. Une copie originale est conservée dans `astrea.save.v1.backup` avant l’enregistrement V2. Les anciens XP et points communs sont répartis au prorata des bonnes réponses enregistrées en Horloge et Maths, sans duplication ni perte du total. Sans aucune bonne réponse enregistrée, les anciens XP sont attribués à Horloge. L’historique V1 étant limité, cette répartition est une approximation explicite. Les anciens objets débloqués et le personnage restent disponibles. Une version future inconnue n’est pas interprétée silencieusement.
+
+Dans les réglages, **Réinitialiser Horloge** ou **Réinitialiser Maths** ouvre une confirmation avant toute modification. Les XP, niveaux, étoiles, score, séries et coffres du parcours choisi repartent à zéro. L’autre parcours, le personnage, les accessoires déjà débloqués, les préférences et les statistiques/historique d’apprentissage sont conservés. L’export JSON permet de garder une copie avant de recommencer.
 
 Statistiques cumulées par activité et par compétence : réussites, erreurs et temps total. Pour l’horloge, clés `minute:35`, `minute:40`, etc. Pour les maths, opération et palier. Historique limité aux 500 dernières réponses avec temps, difficulté, expiration et date. Ces structures permettront une future vue parent et une adaptation plus fine. Les réglages affichent déjà les minutes les plus souvent manquées et les temps moyens.
 
-Les données restent exclusivement dans ce navigateur, sans compte ni télémétrie. La synchronisation entre appareils et l’import de fichier ne sont pas inclus en V1. Un bouton permet d’exporter la sauvegarde JSON. Effacer les données du navigateur supprime la progression. Le mode privé peut ne pas la conserver.
+Les statistiques conservent aussi le numéro d’étoile pour les nouvelles réponses. Les données restent exclusivement dans ce navigateur, sans compte ni télémétrie. La synchronisation entre appareils et l’import de fichier ne sont pas inclus en V1. Un bouton permet d’exporter la sauvegarde JSON. Effacer les données du navigateur supprime la progression. Le mode privé peut ne pas la conserver.
 
 ## PWA et fonctionnement hors connexion
 
@@ -127,11 +134,13 @@ Le build calcule un hash du contenu et génère `dist/sw.js` : cache `astrea-<ha
 
 Navigation : réseau avec repli sur la page précachée ; assets : cache puis réseau. Les fichiers statiques précachés sont servis en ignorant `Vary` pour ne pas dépendre d’en-têtes CORS différents entre précache et chargement de modules. À l’activation d’une nouvelle version, seuls les anciens caches `astrea-` sont supprimés. Une mise à jour attend la fermeture des anciens onglets pour éviter de mélanger deux versions pendant une partie. Reconnecter puis fermer/réouvrir l’application pour appliquer une version en attente. Le service worker nécessite HTTPS (ou localhost).
 
+Les nouvelles icônes PNG (192, 512, maskable et Apple Touch 180) reprennent le mage, la chouette et le dragon de l’accueil. Leurs noms ont changé pour éviter le cache des anciennes ressources, tandis que l’identifiant de la PWA reste identique. iOS peut conserver l’icône d’un raccourci déjà installé : une mise à jour des fichiers ne garantit pas le rafraîchissement de cette icône système. Conserver une sauvegarde avant toute réinstallation ; supprimer une PWA peut supprimer ses données locales.
+
 Installation : Android/Chrome/Edge via le bouton d’installation ou le menu du navigateur ; iOS/iPadOS via **Safari → Partager → Sur l’écran d’accueil**. L’invite native est utilisée quand disponible, sinon les instructions s’affichent. La disponibilité exacte de l’installation dépend du navigateur. L’indicateur réseau est indicatif : `navigator.onLine` ne garantit pas un accès Internet.
 
 ## Accessibilité et responsive
 
-Accueil sans footer avec bouton de réglages en haut à droite ; navigation basse sur les pages secondaires mobiles. L’arène utilise les côtés pour les personnages, avec l’horloge ou le calcul et un pavé de quatre colonnes au centre. Tests paysage 568×320, 844×390, 1024×768, 1280×800 et 1920×1080, et tests portrait 320×568 / 390×844 avec rotation pendant l’épreuve. Les contrôles d’exercice ont une cible d’au moins 44×44 px. HTML sémantique, labels des champs, focus visible, retour de résultat annoncé en live, raccourci de contenu et prise en charge de `prefers-reduced-motion`.
+Accueil sans footer avec bouton de réglages en haut à droite ; navigation basse sur les pages secondaires mobiles. L’arène utilise les côtés pour les personnages, avec l’horloge ou le calcul et un pavé de quatre colonnes au centre. Tests paysage 568×320, 844×390, 1024×768, 1280×800 et 1920×1080, et tests portrait 320×568 / 390×844 avec rotation pendant l’épreuve. Le viewport et les gestionnaires de gestes bloquent le zoom dans l’application (pincement, double tap et raccourcis clavier). Le zoom d’accessibilité du système reste sous le contrôle de l’utilisateur et d’iOS. Les contrôles d’exercice ont une cible d’au moins 44×44 px. HTML sémantique, labels des champs, focus visible, retour de résultat annoncé en live, raccourci de contenu et prise en charge de `prefers-reduced-motion`.
 
 L’horloge ne révèle volontairement pas sa réponse dans son libellé accessible ; cet exercice repose sur la vision. Le calcul mental est utilisable au clavier et dispose d’un énoncé accessible. Les parcours sont exécutés sur Chromium et WebKit (moteur Safari). Les tests automatisés ne remplacent pas un essai sur un iPhone/iPad physique ni un audit d’accessibilité complet.
 

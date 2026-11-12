@@ -1,0 +1,548 @@
+/* Independent journeys and prestige stars. */
+.journey-stars {
+  color: #ffe08a;
+  white-space: nowrap;
+  letter-spacing: 1px;
+  font-weight: 900;
+}
+.journey-stars > span {
+  color: #d2c3b5;
+}
+.arcade-menu-button small .journey-stars {
+  font-size: 14px;
+  color: #493823;
+  text-shadow: 0 1px #ffffff55;
+}
+.arcade-menu-button small .journey-stars > span {
+  color: #586344;
+}
+.adventure-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+.adventure-tabs button {
+  flex: 1;
+  min-width: 210px;
+}
+.adventure-tabs button[aria-pressed='true'] {
+  border-color: var(--gold);
+  background: #c3a2ef24;
+}
+.collection-summary {
+  margin: 18px 0;
+}
+.reset-adventures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.reset-adventures button {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 150px;
+}
+.reset-adventures small {
+  color: var(--muted);
+  font-size: 11px;
+}
+.reset-dialog,
+.clock-lesson {
+  color: #f9f0dc;
+  background: #20223b;
+  border: 2px solid #d6ba83;
+  border-radius: 20px;
+  box-shadow: 0 15px 80px #0009;
+  padding: 24px;
+  width: min(94vw, 560px);
+  max-height: 90dvh;
+}
+.reset-dialog::backdrop,
+.clock-lesson::backdrop {
+  background: #10132be6;
+  backdrop-filter: blur(8px);
+}
+.reset-dialog h2 {
+  font-family: Georgia, serif;
+  font-size: 25px;
+  margin-bottom: 18px;
+}
+.reset-dialog p {
+  font-size: 14px;
+  color: #d8cee8;
+  margin: 18px 0;
+}
+.reset-dialog > div {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+#reset-status {
+  margin-top: 15px;
+  color: #bce8d5;
+}
+/* Keep ordinary page scrolling but remove browser pinch/double-tap gestures. */
+html,
+body,
+#app {
+  touch-action: pan-x pan-y;
+}
+.home-rotate {
+  display: none;
+}
+/* Phone title screen: portrait only, fitted to the available visual viewport. */
+@media (max-width: 600px) and (orientation: portrait),
+  (max-width: 1000px) and (max-height: 600px) and (orientation: landscape) {
+  html.home-screen,
+  html.home-screen body {
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+  .is-home,
+  .is-home .layout,
+  .is-home main {
+    height: 100dvh;
+    min-height: 0;
+    max-height: 100dvh;
+    overflow: hidden;
+  }
+  .is-home .topbar,
+  .is-home .sidebar {
+    display: none;
+  }
+  .is-home .layout {
+    display: block;
+  }
+  .is-home main {
+    padding: 0;
+  }
+  .is-home .arcade-home {
+    height: 100dvh;
+    min-height: 0;
+    max-height: 100dvh;
+    max-width: none;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .is-home .arcade-brand {
+    width: 100%;
+    padding: max(16px, env(safe-area-inset-top)) 55px 0;
+  }
+  .is-home .arcade-brand h1 {
+    font-size: clamp(43px, 8svh, 68px);
+    margin: 13px 0 8px;
+    -webkit-text-stroke-width: 5px;
+  }
+  .is-home .arcade-brand > p:first-child {
+    font-size: 8px;
+    letter-spacing: 2px;
+  }
+  .is-home .arcade-subtitle {
+    font-size: clamp(9px, 1.5svh, 12px);
+    margin-top: 13px;
+  }
+  .is-home .arcade-heroes {
+    background-size: 100% auto;
+    background-position: center center;
+  }
+  .is-home .arcade-home::after {
+    background: linear-gradient(
+      180deg,
+      #20174022,
+      transparent 40%,
+      #171224cf 75%,
+      #171224
+    );
+  }
+  .is-home .arcade-home-bottom {
+    width: 100%;
+    margin: auto 0 0;
+    padding: 0 24px max(18px, env(safe-area-inset-bottom));
+  }
+  .is-home .arcade-home-progress {
+    min-height: 30px;
+    padding: 7px 10px;
+    margin-bottom: 10px;
+    font-size: 10px;
+  }
+  .is-home .arcade-home-progress strong {
+    font-size: 11px;
+  }
+  .is-home .arcade-menu {
+    gap: clamp(9px, 1.5svh, 14px);
+  }
+  .is-home .arcade-menu-button {
+    min-height: clamp(55px, 8svh, 70px);
+    font-size: clamp(17px, 2.7svh, 22px);
+    padding: 7px 13px;
+    gap: 11px;
+  }
+  .is-home .arcade-menu-button > span:first-child {
+    font-size: 30px;
+    min-width: 30px;
+  }
+  .is-home .arcade-menu-button > span:last-child {
+    font-size: 19px;
+  }
+  .is-home .arcade-menu-button small {
+    font-size: clamp(9px, 1.4svh, 11px);
+    margin-top: 3px;
+  }
+  .is-home .home-settings {
+    top: max(12px, env(safe-area-inset-top));
+    right: max(14px, env(safe-area-inset-right));
+    width: 46px;
+    height: 46px;
+  }
+  .is-home .notice {
+    position: fixed;
+    z-index: 30;
+    top: 65px;
+    left: 10px;
+    right: 10px;
+    font-size: 12px;
+    pointer-events: none;
+  }
+}
+@media (max-width: 1000px) and (max-height: 600px) and (orientation: landscape) {
+  .is-home .arcade-home {
+    display: none;
+  }
+  .home-rotate {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 16px;
+    padding: 25px;
+    background: radial-gradient(ellipse, #59427d, #151c35 75%);
+    z-index: 60;
+  }
+  .home-rotate > div {
+    font-size: 48px;
+    color: #f6d78e;
+  }
+  .home-rotate h2 {
+    font:
+      400 28px Georgia,
+      serif;
+  }
+  .home-rotate p {
+    color: #e0d2eb;
+    font-size: 14px;
+  }
+}
+/* Clock period is part of every question from the first star. */
+.time-period {
+  font-weight: 850;
+  font-size: 12px;
+  line-height: 1;
+  color: #ffe69b;
+  background: #594765;
+  border: 1px solid #cbb17f;
+  border-radius: 20px;
+  padding: 6px 12px;
+  margin: 8px 0 0;
+}
+@media (max-height: 600px), (max-width: 1000px) {
+  .time-period {
+    font-size: 10px;
+    padding: 5px 9px;
+    margin-top: 5px;
+  }
+  .in-exercise .battle-shell[data-mode='clock'] .clock {
+    width: min(100%, 154px);
+    margin-top: 5px;
+  }
+  .battle-toolbar #battle-lesson {
+    padding: 5px 8px;
+    font-size: 20px;
+  }
+}
+/* Enemy reply uses the same anchored projectile in the opposite direction. */
+.is-enemy-casting .fighter-enemy .wand-arm {
+  animation: wand-cast 1800ms ease-out both;
+}
+.is-enemy-casting .wand-charge {
+  animation: wand-charge 1800ms ease-out both;
+}
+.is-enemy-casting .spell-projectile {
+  animation: spell-flight 1800ms cubic-bezier(0.2, 0.55, 0.5, 1) both;
+}
+.is-enemy-casting .spell-impact {
+  animation: spell-impact 1800ms ease-out both;
+}
+.is-enemy-casting .spell-sparks {
+  animation: spell-sparks 1800ms ease-out both;
+}
+.spell-blocked .fighter-player .fighter-platform {
+  animation: none;
+}
+.is-enemy-casting.spell-hit .fighter-enemy .fighter-portrait {
+  animation: none;
+}
+.is-enemy-casting.spell-hit .fighter-player .fighter-portrait {
+  animation: player-hit 500ms ease-out;
+}
+.is-enemy-casting.spell-hit .fighter-player .fighter-platform {
+  animation: shield-pulse 800ms ease-out;
+}
+@keyframes player-hit {
+  0%,
+  100% {
+    translate: 0;
+  }
+  25% {
+    translate: -10px -3px;
+    filter: brightness(1.6);
+  }
+  55% {
+    translate: 5px 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .is-enemy-casting .spell-projectile {
+    opacity: 1;
+    transform: translate(var(--to-x), var(--to-y));
+  }
+  .is-enemy-casting .spell-projectile::after {
+    display: none;
+  }
+  .is-enemy-casting .spell-impact {
+    opacity: 0.8;
+    scale: 1;
+  }
+}
+/* The lesson is deliberately scrollable, independently of the locked title screen. */
+.clock-lesson {
+  width: min(95vw, 1000px);
+  padding: 0;
+  max-height: 94dvh;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.clock-lesson > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 18px 22px;
+  position: sticky;
+  top: 0;
+  background: #25263ff5;
+  z-index: 3;
+  border-bottom: 1px solid #d6ba8344;
+}
+.clock-lesson h2 {
+  font:
+    400 30px Georgia,
+    serif;
+}
+.clock-lesson .eyebrow {
+  margin-bottom: 6px;
+}
+.lesson-body {
+  padding: 5px 24px 25px;
+}
+.lesson-body section {
+  margin: 25px 0;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #c0abd122;
+}
+.lesson-body h3 {
+  font:
+    600 22px Georgia,
+    serif;
+  color: #f7d9a0;
+  margin-bottom: 15px;
+}
+.lesson-body p,
+.lesson-body li {
+  color: #e4ddeb;
+  font-size: 16px;
+  line-height: 1.8;
+}
+.lesson-body li {
+  margin-bottom: 12px;
+}
+.lesson-facts {
+  margin: 18px 0;
+  padding: 15px;
+  border-radius: 12px;
+  background: #ad8edb18;
+  border: 1px solid #d5b47755;
+}
+.lesson-minute-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin: 20px 0;
+}
+.lesson-minute-grid > span {
+  padding: 12px;
+  border-radius: 10px;
+  background: #ffffff08;
+  color: #e8d9bc;
+  font-size: 15px;
+}
+.lesson-minute-grid strong {
+  color: #fff4d5;
+}
+.lesson-body summary {
+  min-height: 44px;
+  cursor: pointer;
+  padding: 12px;
+  border: 1px solid #b39ad766;
+  border-radius: 10px;
+}
+.lesson-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+.lesson-body td,
+.lesson-body th {
+  padding: 10px;
+  border: 1px solid #bcacd444;
+  text-align: center;
+  font-size: 15px;
+}
+.lesson-example {
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  gap: 25px;
+  align-items: center;
+}
+.lesson-example .clock {
+  width: 100%;
+  margin: 0;
+}
+.lesson-controls {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 12px 0;
+}
+.lesson-controls button {
+  min-width: 70px;
+  min-height: 44px;
+}
+.lesson-controls button[aria-pressed='true'] {
+  background: #c3a2ef44;
+  border-color: var(--gold);
+}
+#lesson-answer {
+  font-size: 25px;
+  color: #ffe49f;
+  font-weight: 800;
+}
+.lesson-clock-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+  margin-top: 20px;
+}
+.lesson-clock-row figure {
+  margin: 0;
+  text-align: center;
+}
+.lesson-clock-row .clock {
+  width: 100%;
+  margin: 0 0 10px;
+}
+.lesson-clock-row figcaption {
+  color: #ffe7bd;
+  font-size: 16px;
+}
+.lesson-clock-row small {
+  display: block;
+  font-size: 12px;
+  margin-top: 7px;
+}
+@media (max-width: 600px) {
+  .clock-lesson > header {
+    padding: 12px;
+  }
+  .clock-lesson h2 {
+    font-size: 26px;
+  }
+  .lesson-body {
+    padding: 5px 16px 20px;
+  }
+  .lesson-example {
+    grid-template-columns: 1fr;
+  }
+  .lesson-example #lesson-clock {
+    width: 210px;
+    margin: auto;
+  }
+  .lesson-minute-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .lesson-clock-row {
+    grid-template-columns: 1fr 1fr;
+  }
+  .reset-dialog {
+    padding: 18px;
+  }
+  .reset-dialog > div button {
+    min-width: 125px;
+  }
+}
+/* Reserve fixed touch rows on short landscape screens, regardless of system font metrics. */
+@media (max-height: 360px) and (orientation: landscape) {
+  .battle-content {
+    grid-template-rows: minmax(0, 1fr);
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+  .duel-desk {
+    height: 100%;
+    min-height: 0;
+    padding: 6px;
+  }
+  .in-exercise .battle-shell .exercise-board h2 {
+    font-size: 15px;
+    line-height: 1.15;
+  }
+  .in-exercise .battle-shell .exercise-meta {
+    line-height: 1.2;
+  }
+  .in-exercise .battle-shell[data-mode='clock'] .clock {
+    width: 150px;
+    margin: 4px auto;
+  }
+  .time-period {
+    margin-top: 3px;
+    padding: 4px 8px;
+  }
+  .in-exercise .battle-shell .exercise-hint {
+    line-height: 1.2;
+  }
+  .in-exercise .battle-shell .answer-display {
+    margin-bottom: 4px;
+  }
+  .in-exercise .battle-shell .answer-field {
+    height: 44px;
+    line-height: 1;
+  }
+  .in-exercise .battle-shell .key {
+    height: 44px;
+    padding: 0;
+    line-height: 1;
+  }
+  .in-exercise .battle-shell .validate {
+    height: 44px;
+    margin-top: 4px;
+    line-height: 1.15;
+  }
+}

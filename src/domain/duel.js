@@ -1,4 +1,5 @@
-import { STAGES, position } from './progression.js';
+import { journeyFor } from './adventures.js';
+import { STAGES } from './progression.js';
 
 export const AVATAR_OPTIONS = {
   skin: [
@@ -168,12 +169,12 @@ export const ENEMIES = [
   ['ombre-dragon', 'Le dragon d’ombre', 'dragon', 'dragon', 'fire', '#713d92', '#ffbd68', 'dragon'],
   [
     'dragon-lumiere',
-    'Dragon de lumière',
+    'Le dragon du château',
     'dragon',
     'dragon',
     'stars',
-    '#428f8d',
-    '#fff0a8',
+    '#624681',
+    '#ffce84',
     'castle',
   ],
 ].map(([id, name, hat, feature, sigil, color, accent, scene], index) => ({
@@ -189,13 +190,15 @@ export const ENEMIES = [
   kind: hat === 'dragon' ? 'dragon' : 'wizard',
 }));
 export function encounter(xp) {
-  const index = position(xp);
+  const journey = journeyFor(xp);
+  const index = journey.stageIndex;
   return {
     index,
     stage: STAGES[index],
     enemy: ENEMIES[index],
     remaining: 100 - (Math.max(0, xp) % 100),
-    rescued: xp >= 1900,
+    rescued: journey.complete,
+    ...journey,
   };
 }
 export const COUNTDOWN_MS = 5000;
@@ -224,7 +227,10 @@ export class DuelClock {
         this.answerMs = 0;
       }
     } else if (this.phase === 'active') this.answerMs += delta;
-    else if (this.phase === 'success') this.spellMs += delta;
+    else if (this.phase === 'success' || this.phase === 'failure-cast') {
+      this.spellMs += delta;
+      if (this.phase === 'failure-cast' && this.spellMs >= SPELL_MS) this.phase = 'failure';
+    }
     return this.phase;
   }
   get count() {
@@ -232,7 +238,7 @@ export class DuelClock {
   }
   result(correct, now) {
     this.last = now;
-    this.phase = correct ? 'success' : 'failure';
+    this.phase = correct ? 'success' : 'failure-cast';
     this.spellMs = 0;
   }
   question(now, newEncounter = false) {

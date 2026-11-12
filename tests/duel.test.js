@@ -22,11 +22,12 @@ test('20 rencontres originales, cohérentes avec les étapes et le dragon final'
   assert.ok(ENEMIES.slice(0, 18).every((e) => e.kind === 'wizard'));
   assert.equal(encounter(1800).enemy.kind, 'dragon');
   assert.equal(encounter(1899).rescued, false);
-  assert.equal(encounter(1900).rescued, true);
+  assert.equal(encounter(1900).rescued, false);
+  assert.equal(encounter(6000).rescued, true);
   assert.equal(encounter(0).enemy.id, 'brindor');
   assert.equal(encounter(900).enemy.scene, 'clock');
 });
-test('énergie dérivée des XP communs et passage de niveau sans nouvelle sauvegarde de combat', () => {
+test('énergie indépendante dans chaque aventure', () => {
   for (const [xp, hp, index] of [
     [0, 100, 0],
     [25, 75, 0],
@@ -40,18 +41,20 @@ test('énergie dérivée des XP communs et passage de niveau sans nouvelle sauve
   }
   let s = freshState();
   s.xp = 75;
+  s.adventures.clock.xp = 75;
   s = recordAnswer(
     s,
     { mode: 'clock', key: 'minute:00', level: 0 },
     { correct: true, elapsed: 1, limit: 40 },
   ).state;
-  assert.equal(encounter(s.xp).index, 1);
+  assert.equal(encounter(s.adventures.clock.xp).index, 1);
   s = recordAnswer(
     s,
     { mode: 'math', key: '+:0', tier: 0 },
     { correct: true, elapsed: 1, limit: 30 },
   ).state;
-  assert.equal(encounter(s.xp).remaining, 75);
+  assert.equal(encounter(s.adventures.clock.xp).remaining, 100);
+  assert.equal(encounter(s.adventures.math.xp).remaining, 75);
 });
 test('décompte exact 5,4,3,2,1 puis chrono de question, sans bonus de temps sur l’introduction', () => {
   const c = new DuelClock(100);
@@ -134,6 +137,8 @@ test('personnalisation normalisée, accessoires verrouillés et débloqués', ()
 test('les anciennes sauvegardes et les choix personnalisés se restaurent sans perte d’XP', () => {
   const old = freshState();
   old.xp = 125;
+  old.version = 1;
+  delete old.adventures;
   delete old.avatar;
   const restored = restore(JSON.stringify(old));
   assert.equal(restored.warning, '');

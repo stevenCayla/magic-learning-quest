@@ -81,6 +81,10 @@ export function createSoundPlayer() {
         glide: true,
         volume: 0.09,
       });
+    else if (kind === 'enemy-cast')
+      sequence([360, 240, 160], { type: 'triangle', duration: 0.36, spacing: 0.08, volume: 0.09 });
+    else if (kind === 'enemy-impact')
+      sequence([130, 95, 392], { duration: 0.28, spacing: 0.06, volume: 0.1 });
     else if (kind === 'impact')
       sequence([95, 190, 760, 1046.5], {
         type: 'triangle',
