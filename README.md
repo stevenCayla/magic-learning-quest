@@ -2,15 +2,23 @@
 
 Une PWA éducative en français pour les 8–10 ans : lire une horloge analogique et calculer de tête pour traverser un monde magique original, affronter le dragon d’ombre et délivrer la princesse Aélis. Les deux entraînements alimentent **une seule aventure**, sauvegardée sur l’appareil.
 
-URL cible après activation de Pages et fusion de la PR : **https://stevencayla.github.io/magic-learning-quest/**.
+Application publiée sur GitHub Pages : **https://stevencayla.github.io/magic-learning-quest/**.
 
 ## Jouer
 
+L’accueil s’adapte aussi au paysage pour permettre de changer d’entraînement sans faire défiler la page. Il ne comporte pas de navigation basse : la roue dentée en haut à droite ouvre les réglages et la personnalisation. Le grimoire reste accessible depuis l’aventure.
+
 Depuis l’accueil, choisir **Horloge magique** ou **Maths magiques**. Utiliser les grandes touches du pavé ou les chiffres du clavier, puis **Lancer mon sort**. Pour l’horloge, toucher le champ heures ou minutes pour le modifier. Le champ minutes s’active automatiquement après une heure complète ; une heure à un chiffre comme 1 peut être saisie `01` ou en touchant ensuite le champ minutes. `C` efface le champ actif, `⌫` retire son dernier chiffre. `Tab` permet de parcourir les commandes et `Entrée` active le bouton sélectionné. `Échap` revient au menu.
 
-Une bonne réponse affiche immédiatement « Bravo ! », des étoiles et les points gagnés sur l’exercice, puis passe automatiquement au suivant après 1,2 seconde. Une erreur affiche la correction, conserve tous les XP et transforme le bouton en **Recommencer** pour réessayer le même exercice. Il n’y a plus de bouton « Sort suivant ». À la fin du chrono, la correction apparaît également. Le chrono se met en pause quand la page est en arrière-plan. Le **mode découverte** désactive le chrono et les bonus de rapidité.
+Sur téléphone, les deux entraînements se jouent **en paysage**. En portrait, une invitation à tourner l’appareil suspend réellement l’épreuve ; le bouton de retour reste disponible. Safari/PWA sur iPhone ne garantissant pas le verrouillage logiciel de l’orientation, le jeu attend la rotation. Vérifier le verrouillage d’orientation du téléphone si nécessaire.
 
-Dans **Aventure**, suivre les 20 étapes. Les coffres s’ouvrent automatiquement à leur arrivée, les objets apparaissent dans le **Grimoire**. Le combat final utilise les mêmes exercices : de 1 800 à 1 900 XP, chaque réussite dissipe l’ombre du dragon ; à 1 900 XP, la princesse est délivrée. L’entraînement peut continuer ensuite.
+Chaque entrée dans un duel et chaque nouvelle étape commencent par **5 → 4 → 3 → 2 → 1 → COMBAT !**, avec chiffres lumineux, anneaux d’énergie et sons originaux. Les questions sont masquées et le chrono pédagogique ne démarre qu’après ces cinq secondes. Il n’y a pas de nouveau décompte entre les questions du même combat ni lors d’un réessai.
+
+Une bonne réponse affiche immédiatement Bravo, XP et points : le mage arme sa baguette, charge sa pointe et lance un projectile à traînée lumineuse vers l’adversaire. L’impact, les éclats et le son réduisent son énergie, puis l’exercice suivant arrive automatiquement après la séquence de **1,8 seconde**. Une erreur ou une expiration conserve les XP, affiche la correction et un contresort doux ; **Recommencer** réessaie la même question sans refaire l’introduction. Le mode découverte désactive le chrono pédagogique et les bonus de rapidité, tout en conservant le décompte de présentation.
+
+Le décompte, le chrono et la transition sont suspendus en portrait ou en arrière-plan. Quitter l’épreuve annule les effets et transitions. Les effets et sons sont entièrement originaux : l’inspiration arcade ne reprend aucun asset ni son de Sky Force Reloaded.
+
+Dans **Aventure**, suivre les 20 étapes. Les coffres s’ouvrent automatiquement à leur arrivée, les objets apparaissent dans le **Grimoire**. Le combat final utilise les mêmes exercices : de 1 800 à 1 900 XP, chaque réussite dissipe l’ombre du dragon ; à 1 900 XP, la princesse est délivrée. Une scène de victoire montre Aélis délivrée. L’entraînement peut continuer ensuite avec le dragon de lumière.
 
 ## Stack et architecture
 
@@ -21,10 +29,18 @@ src/
   domain/
     exercises.js    # Générateurs injectables, validation stricte, paliers, chrono
     progression.js  # Score, XP, séries, étapes, récompenses et statistiques
+    duel.js         # Rencontres, horloge de combat pure et personnalisation normalisée
     storage.js      # Sauvegarde versionnée, validation et restauration
+  ui/battle/
+    controller.js   # Phases, saisie, interruptions et déclenchement des effets
+    view.js         # Composition de l’arène
+    characters.js   # Mages, dragon et princesse en SVG originaux
+    scenes.js       # 20 décors en lien avec les étapes
+    battle.css      # Arène paysage, animation de baguette, vol et impact
+  ui/customize.js   # Choix du personnage et aperçu
   ui/sound.js       # Carillons Web Audio originaux, utilisables hors connexion
   ui/clock.js       # Rendu SVG de l’horloge (position réelle des deux aiguilles)
-  main.js           # Contrôleur UI, navigation, saisie, cycle d’exercice, installation
+  main.js           # Accueil, navigation, réglages, personnalisation et installation
   style.css         # Design translucide, responsive, focus et reduced motion
 public/
   arcade-heroes.webp # Illustration originale de l’accueil arcade
@@ -35,6 +51,7 @@ public/
 scripts/build-sw.js # Génère le service worker et son précache depuis le build
 tests/
   domain.test.js    # Tests métier Node sans DOM
+  duel.test.js      # Temps de combat, pauses, énergie, accessoires et anciens formats
   e2e/app.spec.js   # Parcours Playwright, responsive et PWA
 .github/workflows/ci-pages.yml
 ```
@@ -81,13 +98,22 @@ Ouvrir `http://localhost:4173/magic-learning-quest/`. Tester la PWA sur ce build
 - **Chrono** : horloge 40/35/30/25/20 secondes ; maths 30/24/18 secondes. Bonne réponse = 20 XP et 100 points. Dans la première moitié du temps = +5 XP et +50 points. Une série ajoute des points bonus tous les 3 succès, plafonnés à 100. Erreur ou expiration = 0 XP et série réinitialisée, sans perte de score ni trésors.
 - **Aventure** : 100 XP par étape, niveau de mage +1 tous les 100 XP, 20 étapes et 13 récompenses. Les gardiens intermédiaires et le dragon sont traversés grâce aux exercices communs ; pas de mini-jeu non éducatif qui bloque la progression.
 
+
+## Personnage et adversaires
+
+Dans les réglages : nom, teint, couleur et forme des cheveux, expression/lunettes, tenue, chapeau et baguette. L’aperçu et le combattant utilisent le même SVG. Les choix sont sauvegardés dans `avatar` au format V1 ; les valeurs inconnues sont normalisées sans invalider toute la progression. Baguette Soleil : 400 XP ; tenue Aurore : 1 200 XP ; couronne : 1 900 XP.
+
+Les 18 premières étapes ont chacune leur sorcier adverse, avec nom, silhouette/accessoire, visage, couleur et signature magique propres. La 19e est le dragon d’ombre ; la 20e est le château libéré, avec entraînement libre contre un dragon de lumière. Chacun des 20 décors possède un lieu distinct : village, forêt, pont, griffon, bibliothèque, jardin, potions, golem, lac, tour, nuages, phénix, étoiles, cristaux, crypte, trésor, vallée, remparts, antre et château. Les SVG sont intégrés au build, donc disponibles hors connexion.
+
+L’énergie adverse est dérivée de `100 - (XP % 100)` : Horloge et Maths partagent exactement le même combat et une sauvegarde ancienne le restaure sans compteur supplémentaire. Une réussite fait 20 ou 25 dégâts, égaux aux XP attribués. Les statistiques d’apprentissage et les paliers restent indépendants du décor et des adversaires. Recharger reprend la progression et le personnage, avec un nouveau décompte et une nouvelle question ; la saisie inachevée n’est pas conservée.
+
 ## Sauvegarde et statistiques
 
 `localStorage['astrea.save']`, format **version 1**. Écriture après chaque réponse et chaque réglage. Restauration validée au démarrage, récompenses recalculées depuis les XP. Si le format est corrompu/incompatible, une alerte apparaît et une nouvelle partie en mémoire est proposée. Si le stockage est bloqué ou plein, l’application signale que la sauvegarde n’a pas réussi. Éviter de fermer dans ce cas.
 
-Les sons magiques sont synthétisés localement via Web Audio (carillon de victoire et son doux pour réessayer), sans téléchargement. Le son est activé depuis un geste utilisateur pour respecter les contraintes iPhone ; il se coupe dans l’exercice ou les réglages. La préférence est conservée, et les anciennes sauvegardes restent compatibles. Les particules et mouvements sont désactivés avec `prefers-reduced-motion`. Le passage automatique est annulé en quittant l’exercice et suspendu en arrière-plan. Les coffres et changements d’étape restent annoncés après le passage au sort suivant.
+Les sons magiques sont synthétisés localement via Web Audio (carillon de victoire et son doux pour réessayer), sans téléchargement. Le son est activé depuis un geste utilisateur pour respecter les contraintes iPhone ; il se coupe dans l’exercice ou les réglages. La préférence est conservée, et les anciennes sauvegardes restent compatibles. Les bips du décompte, l’annonce de départ, la montée du sort et l’impact ont des timbres et hauteurs distincts. Les particules et mouvements sont désactivés avec `prefers-reduced-motion`. Le passage automatique est annulé en quittant l’exercice et suspendu en arrière-plan. Les coffres et changements d’étape restent annoncés après le passage au sort suivant.
 
-La fonction `restore` centralise le point d’entrée des futures migrations de version. Aucune migration historique n’est requise pour cette première version ; une version future inconnue n’est pas interprétée silencieusement.
+La fonction `restore` centralise le point d’entrée des futures migrations de version. Les sauvegardes V1 antérieures à la personnalisation reçoivent un avatar par défaut sans perte de progression ; une version future inconnue n’est pas interprétée silencieusement.
 
 Statistiques cumulées par activité et par compétence : réussites, erreurs et temps total. Pour l’horloge, clés `minute:35`, `minute:40`, etc. Pour les maths, opération et palier. Historique limité aux 500 dernières réponses avec temps, difficulté, expiration et date. Ces structures permettront une future vue parent et une adaptation plus fine. Les réglages affichent déjà les minutes les plus souvent manquées et les temps moyens.
 
@@ -105,7 +131,7 @@ Installation : Android/Chrome/Edge via le bouton d’installation ou le menu du 
 
 ## Accessibilité et responsive
 
-Interfaces distinctes : barre latérale sur ordinateur, navigation basse sur tablette/mobile, horloge et pavé empilés sur téléphone. Tests aux tailles 320×568, 390×844, 768×1024, 1280×800 et 1920×1080. Les contrôles d’exercice ont une cible d’au moins 44×44 px. HTML sémantique, labels des champs, focus visible, retour de résultat annoncé en live, raccourci de contenu et prise en charge de `prefers-reduced-motion`.
+Accueil sans footer avec bouton de réglages en haut à droite ; navigation basse sur les pages secondaires mobiles. L’arène utilise les côtés pour les personnages, avec l’horloge ou le calcul et un pavé de quatre colonnes au centre. Tests paysage 568×320, 844×390, 1024×768, 1280×800 et 1920×1080, et tests portrait 320×568 / 390×844 avec rotation pendant l’épreuve. Les contrôles d’exercice ont une cible d’au moins 44×44 px. HTML sémantique, labels des champs, focus visible, retour de résultat annoncé en live, raccourci de contenu et prise en charge de `prefers-reduced-motion`.
 
 L’horloge ne révèle volontairement pas sa réponse dans son libellé accessible ; cet exercice repose sur la vision. Le calcul mental est utilisable au clavier et dispose d’un énoncé accessible. Les parcours sont exécutés sur Chromium et WebKit (moteur Safari). Les tests automatisés ne remplacent pas un essai sur un iPhone/iPad physique ni un audit d’accessibilité complet.
 
@@ -121,6 +147,6 @@ Activation par le propriétaire si l’intégration n’a pas les droits Pages :
 4. Si l’environnement `github-pages` demande une validation, approuver le déploiement.
 5. Ouvrir **https://stevencayla.github.io/magic-learning-quest/**, puis vérifier un rechargement en mode avion après la première ouverture.
 
-Le dépôt est initialement **privé** : selon le forfait GitHub du propriétaire, Pages peut nécessiter un forfait payant compatible. Si GitHub le signale, activer un forfait compatible ou décider explicitement de rendre le dépôt public. Aucun changement de visibilité n’est effectué automatiquement.
+Le dépôt est désormais public. Pour un déploiement futur dans un dépôt privé : selon le forfait GitHub du propriétaire, Pages peut nécessiter un forfait payant compatible. Si GitHub le signale, activer un forfait compatible ou décider explicitement de rendre le dépôt public. Aucun changement de visibilité n’est effectué automatiquement.
 
 Les changements de source doivent être relus dans la PR ; le workflow déploie après fusion sur `main`. Pour revenir à une version précédente, rétablir son code par commit sur `main` et laisser tous les contrôles s’exécuter.

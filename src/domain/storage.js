@@ -1,3 +1,4 @@
+import { DEFAULT_AVATAR, normalizeAvatar } from './duel.js';
 import { DIFFICULTIES } from './exercises.js';
 import { unlockedRewards } from './progression.js';
 export const SAVE_KEY = 'astrea.save';
@@ -11,6 +12,7 @@ export function freshState() {
     streak: 0,
     bestStreak: 0,
     rewards: [],
+    avatar: { ...DEFAULT_AVATAR },
     settings: { difficulty: 'auto', clockLevel: 'auto', relaxed: false, sound: true },
     stats: { clock: stats(), math: stats() },
     history: [],
@@ -69,6 +71,7 @@ export function restore(raw) {
         buckets,
       };
     }
+    base.avatar = normalizeAvatar(data.avatar, base.xp);
     base.rewards = unlockedRewards(base.xp);
     base.history = Array.isArray(data.history)
       ? data.history
