@@ -152,7 +152,13 @@ body,
     background-position: center center;
   }
   .is-home .arcade-home::after {
-    background: linear-gradient(180deg, #20174022, transparent 40%, #171224cf 75%, #171224);
+    background: linear-gradient(
+      180deg,
+      #20174022,
+      transparent 40%,
+      #171224cf 75%,
+      #171224
+    );
   }
   .is-home .arcade-home-bottom {
     width: 100%;
@@ -490,5 +496,53 @@ body,
   }
   .reset-dialog > div button {
     min-width: 125px;
+  }
+}
+/* Reserve fixed touch rows on short landscape screens, regardless of system font metrics. */
+@media (max-height: 360px) and (orientation: landscape) {
+  .battle-content {
+    grid-template-rows: minmax(0, 1fr);
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+  .duel-desk {
+    height: 100%;
+    min-height: 0;
+    padding: 6px;
+  }
+  .in-exercise .battle-shell .exercise-board h2 {
+    font-size: 15px;
+    line-height: 1.15;
+  }
+  .in-exercise .battle-shell .exercise-meta {
+    line-height: 1.2;
+  }
+  .in-exercise .battle-shell[data-mode='clock'] .clock {
+    width: 150px;
+    margin: 4px auto;
+  }
+  .time-period {
+    margin-top: 3px;
+    padding: 4px 8px;
+  }
+  .in-exercise .battle-shell .exercise-hint {
+    line-height: 1.2;
+  }
+  .in-exercise .battle-shell .answer-display {
+    margin-bottom: 4px;
+  }
+  .in-exercise .battle-shell .answer-field {
+    height: 44px;
+    line-height: 1;
+  }
+  .in-exercise .battle-shell .key {
+    height: 44px;
+    padding: 0;
+    line-height: 1;
+  }
+  .in-exercise .battle-shell .validate {
+    height: 44px;
+    margin-top: 4px;
+    line-height: 1.15;
   }
 }
