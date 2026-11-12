@@ -75,6 +75,7 @@ export function createBattleController({ getState, setState, render, onNavigate,
         sound: state.settings.sound,
       }),
     );
+    if (clock.phase !== 'countdown') document.querySelector('.battle-go')?.remove();
     root().style.setProperty('--spell-color', avatarColor(state.avatar, 'wand'));
     document.querySelector('#back').onclick = () => onNavigate('home');
     document.querySelector('#rotate-exit').onclick = () => onNavigate('home');

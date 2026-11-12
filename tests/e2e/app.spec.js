@@ -183,6 +183,7 @@ test('sort : geste de baguette, trajectoire ancrée, impact et récompense uniqu
   await page.clock.runFor(800);
   await expect(page.locator('.battle-shell')).toHaveAttribute('data-phase', 'active');
   await expect(page.locator('#feedback')).toBeEmpty();
+  await expect(page.locator('.battle-go')).toHaveCount(0);
   const saved = await state(page);
   expect(saved.xp).toBe(20);
   expect(saved.stats.clock.correct).toBe(1);
