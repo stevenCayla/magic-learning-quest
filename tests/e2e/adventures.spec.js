@@ -235,7 +235,7 @@ test('migration réelle V1 conserve total, avatar, statistiques et copie origina
   expect(migrated.version).toBe(2);
   expect(migrated.adventures.clock.xp).toBe(300);
   expect(migrated.adventures.math.xp).toBe(100);
-  expect(migrated.avatar).toEqual(legacy.avatar);
+  expect(migrated.avatar).toMatchObject(legacy.avatar);
   expect(
     await page.evaluate(() =>
       JSON.parse(localStorage.getItem('astrea.save.v1.backup')),

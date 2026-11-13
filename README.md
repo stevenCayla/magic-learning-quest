@@ -8,6 +8,10 @@ Application publiée sur GitHub Pages : **https://stevencayla.github.io/magic-le
 
 Le fond de l’accueil suit un dégradé continu de bleu clair vers le bleu foncé, avec une apparition progressive de l’illustration sans bande sous le titre. Sur téléphone, l’accueil tient dans la hauteur disponible, sans défilement, et se consulte uniquement en portrait. En paysage, une invitation demande de tourner le téléphone à la verticale. Il ne comporte pas de navigation basse : la roue dentée en haut à droite ouvre les réglages et la personnalisation. Le grimoire reste accessible depuis l’aventure.
 
+À la toute première ouverture, l’accueil présente uniquement **Commencer** et le numéro de version. Le joueur choisit **Garçon** ou **Fille**, indique son nom (obligatoire, 18 caractères maximum), puis personnalise son apparence, sa tenue et sa baguette. Le décor de l’école, de la lune et des nuages est commun aux deux étapes de création. Sur téléphone, ces étapes se consultent en portrait ; une rotation conserve les choix. Les marges de l’encoche et le clavier logiciel sont pris en compte. Les choix sont visibles immédiatement et le même personnage apparaît ensuite dans les combats.
+
+Le brouillon est sauvegardé à chaque choix : fermer ou recharger reprend l’étape en cours. **Commencer mon aventure** valide le personnage puis affiche Horloge, Maths et Mes aventures. L’initialisation ne réapparaît plus. Les réglages permettent ensuite de modifier le personnage et son nom. Les anciennes sauvegardes sans champ `onboarding` sont considérées comme déjà initialisées pour conserver le personnage et la progression existants. Réinitialiser les XP ne relance pas la création.
+
 Depuis l’accueil, choisir **Horloge magique** ou **Maths magiques**. Utiliser les grandes touches du pavé ou les chiffres du clavier, puis **Lancer mon sort**. Pour l’horloge, toucher le champ heures ou minutes pour le modifier. Le champ minutes s’active automatiquement après une heure complète ; une heure à un chiffre comme 1 peut être saisie `01` ou en touchant ensuite le champ minutes. `C` efface le champ actif, `⌫` retire son dernier chiffre. `Tab` permet de parcourir les commandes et `Entrée` active le bouton sélectionné. `Échap` revient au menu.
 
 Sur téléphone, les deux entraînements se jouent **en paysage**. En portrait, une invitation à tourner l’appareil suspend réellement l’épreuve ; le bouton de retour reste disponible. Safari/PWA sur iPhone ne garantissant pas le verrouillage logiciel de l’orientation, le jeu attend la rotation. Vérifier le verrouillage d’orientation du téléphone si nécessaire.
@@ -37,6 +41,7 @@ src/
     adventures.js   # Deux parcours, cycles de 20 niveaux, étoiles et remise à zéro
     progression.js  # Score, XP, séries, étapes, récompenses et statistiques
     duel.js         # Rencontres, horloge de combat pure et personnalisation normalisée
+    onboarding.js   # Création, brouillon, validation finale et compatibilité
     storage.js      # Sauvegarde versionnée, validation et restauration
   ui/battle/
     controller.js   # Phases, saisie, interruptions et déclenchement des effets
@@ -47,6 +52,11 @@ src/
   ui/clock-lesson.js # Leçon illustrée et horloge manipulable
   ui/adventure-settings.js # Confirmation de remise à zéro ciblée
   ui/zoom-guard.js  # Gestes de zoom et raccourcis
+  build/version.js # Version dérivée du tag de release, testable sans GitHub
+  ui/onboarding.js # Choix, personnalisation et gestion du clavier mobile
+  ui/onboarding.css # Décor commun, cartes et contrôles tactiles
+  ui/player-mage.js # Personnage SVG commun à la création et au combat
+  ui/version.js    # Numéro de version embarqué, disponible offline
   ui/customize.js   # Choix du personnage et aperçu
   ui/sound.js       # Carillons Web Audio originaux, utilisables hors connexion
   ui/clock.js       # Rendu SVG de l’horloge (position réelle des deux aiguilles)
@@ -54,16 +64,21 @@ src/
   style.css         # Design translucide, responsive, focus et reduced motion
 public/
   arcade-heroes.webp # Illustration originale de l’accueil arcade
+  creation-sky.webp # École, lune et nuages des deux écrans de création
   castle.svg        # Illustration originale de l’académie
   icon.svg
   icons/            # PNG 192/512, maskable et Apple Touch 180
   manifest.webmanifest
 scripts/build-sw.js # Génère le service worker et son précache depuis le build
+scripts/check-release.js # Vérifie le tag, le commit et les métadonnées avant publication
 tests/
+  onboarding.test.js # Brouillon, profils existants, validation et versions
+  health.test.js    # Vie, défaite, reprise de niveau et compatibilité
   domain.test.js    # Tests métier Node sans DOM
   adventures.test.js # Étoiles, indépendance, progression, migrations et remise à zéro
   duel.test.js      # Temps de combat, pauses, énergie, accessoires et anciens formats
   e2e/app.spec.js   # Parcours Playwright, responsive et PWA
+  e2e/onboarding.spec.js # Première utilisation, reprise, clavier et offline
 .github/workflows/ci-pages.yml
 ```
 
@@ -110,7 +125,7 @@ Ouvrir `http://localhost:4173/magic-learning-quest/`. Tester la PWA sur ce build
 
 ## Personnage et adversaires
 
-Dans les réglages : nom, teint, couleur et forme des cheveux, expression/lunettes, tenue, chapeau et baguette. L’aperçu et le combattant utilisent le même SVG. Les choix sont sauvegardés dans `avatar` au format V2 ; les valeurs inconnues sont normalisées sans invalider toute la progression. Baguette Soleil : 400 XP ; tenue Aurore : 1 200 XP ; couronne : 1 900 XP.
+À la création puis dans les réglages : personnage garçon/fille, nom, teint, couleur et forme des cheveux, expression/lunettes, tenue, chapeau et baguette. L’aperçu et le combattant utilisent le même SVG. Les choix sont sauvegardés dans `avatar` au format V2 ; les valeurs inconnues sont normalisées sans invalider toute la progression. Baguette Soleil : 400 XP ; tenue Aurore : 1 200 XP ; couronne : 1 900 XP.
 
 Les 18 premières étapes ont chacune leur sorcier adverse, avec nom, silhouette/accessoire, visage, couleur et signature magique propres. La 19e est le dragon d’ombre ; la 20e est la bataille finale contre le dragon du château pour délivrer Aélis. Chacun des 20 décors possède un lieu distinct : village, forêt, pont, griffon, bibliothèque, jardin, potions, golem, lac, tour, nuages, phénix, étoiles, cristaux, crypte, trésor, vallée, remparts, antre et château. Les SVG sont intégrés au build, donc disponibles hors connexion.
 
@@ -144,22 +159,35 @@ Installation : Android/Chrome/Edge via le bouton d’installation ou le menu du 
 
 ## Accessibilité et responsive
 
-Accueil sans footer avec bouton de réglages en haut à droite ; navigation basse sur les pages secondaires mobiles. L’arène utilise les côtés pour les personnages, avec l’horloge ou le calcul et un pavé de quatre colonnes au centre. Tests paysage 568×320, 844×390, 1024×768, 1280×800 et 1920×1080, et tests portrait 320×568 / 390×844 avec rotation pendant l’épreuve. Le viewport et les gestionnaires de gestes bloquent le zoom dans l’application (pincement, double tap et raccourcis clavier). Le zoom d’accessibilité du système reste sous le contrôle de l’utilisateur et d’iOS. Les contrôles d’exercice ont une cible d’au moins 44×44 px. HTML sémantique, labels des champs, focus visible, retour de résultat annoncé en live, raccourci de contenu et prise en charge de `prefers-reduced-motion`.
+Accueil sans navigation basse ; après création du personnage, le bouton de réglages apparaît en haut à droite. Navigation basse sur les pages secondaires mobiles. L’arène utilise les côtés pour les personnages, avec l’horloge ou le calcul et un pavé de quatre colonnes au centre. Tests paysage 568×320, 844×390, 1024×768, 1280×800 et 1920×1080, et tests portrait 320×568 / 390×844 avec rotation pendant l’épreuve. Le viewport et les gestionnaires de gestes bloquent le zoom dans l’application (pincement, double tap et raccourcis clavier). Le zoom d’accessibilité du système reste sous le contrôle de l’utilisateur et d’iOS. Les contrôles d’exercice ont une cible d’au moins 44×44 px. HTML sémantique, labels des champs, focus visible, retour de résultat annoncé en live, raccourci de contenu et prise en charge de `prefers-reduced-motion`.
 
 L’horloge ne révèle volontairement pas sa réponse dans son libellé accessible ; cet exercice repose sur la vision. Le calcul mental est utilisable au clavier et dispose d’un énoncé accessible. Les parcours sont exécutés sur Chromium et WebKit (moteur Safari). Les tests automatisés ne remplacent pas un essai sur un iPhone/iPad physique ni un audit d’accessibilité complet.
 
 ## CI et GitHub Pages
 
-**Quality & Pages** s’exécute sur les PR vers `main`, les push `main`/`feat/**`/`fix/**` et manuellement : `npm ci` → lint → tests métier → build → Playwright (parcours, tailles et offline). Aucun déploiement si un contrôle requis échoue. Sur `main` seulement, le même build validé est envoyé à Pages puis déployé avec OIDC, permissions `pages:write` et `id-token:write` limitées au job de déploiement.
+**Quality & Pages** exécute `npm ci` → lint → tests métier → build → Playwright sur les PR, les push `main` / `feat/**` / `fix/**`, et les exécutions manuelles. Une fusion sur `main` valide le code, sans publier une version de développement sur le site public.
+
+La publication d’une **release GitHub stable** portant un tag `vMAJEUR.MINEUR.CORRECTIF` (par exemple `v1.1.0`) déclenche automatiquement une exécution depuis `main`. Celle-ci construit le **commit exact du tag**, vérifie que la release est publiée et que ce commit appartient à l’historique de `main`, injecte le tag dans le build, vérifie que les métadonnées produites correspondent exactement au tag et au commit, puis rejoue tous les contrôles. Le même artefact validé est envoyé à Pages. Cette orchestration respecte la protection existante de l’environnement `github-pages`, limitée à `main`.
+
+Le numéro affiché sur l’accueil et les écrans de création vient de `RELEASE_VERSION`, jamais d’une requête GitHub à l’ouverture. `version.json` contient aussi le commit et l’URL de la release ; il est précaché. Le numéro reste donc exact hors connexion. Sans tag injecté, les builds locaux et les prévisualisations affichent `v<package.version>-dev` et ne sont pas déployés automatiquement. Une future release peut utiliser un nouveau tag sans modifier une chaîne dans l’interface.
+
+Pour publier :
+
+1. Fusionner les changements dans `main` et vérifier la CI.
+2. Créer une release GitHub stable avec un nouveau tag `vX.Y.Z`, ciblant ce commit de `main`, puis la publier.
+3. Attendre **Schedule published release from main**, puis l’exécution **workflow_dispatch** qui teste le tag et déploie Pages.
+4. Vérifier le numéro sur l’accueil et dans `/magic-learning-quest/version.json`.
+
+Pour rejouer une publication existante : lancer **Quality & Pages** sur la branche **main**, en renseignant `release_tag` avec le tag d’une release stable déjà publiée. Sans ce champ, seuls les contrôles sont exécutés. Les préreleases ne mettent pas à jour le site public. Le job de programmation dispose de `actions:write` pour déclencher le workflow ; le job de déploiement possède seulement les droits Pages/OIDC nécessaires.
 
 Activation par le propriétaire si l’intégration n’a pas les droits Pages :
 
 1. Dans **Settings → Pages → Build and deployment → Source**, choisir **GitHub Actions**.
 2. Autoriser GitHub Actions pour le dépôt et les actions officielles utilisées, si nécessaire.
-3. Fusionner la PR dans `main`, ou relancer **Quality & Pages** sur `main` après activation.
+3. Publier une release stable depuis `main`, ou relancer **Quality & Pages** sur `main` avec son `release_tag` après activation.
 4. Si l’environnement `github-pages` demande une validation, approuver le déploiement.
 5. Ouvrir **https://stevencayla.github.io/magic-learning-quest/**, puis vérifier un rechargement en mode avion après la première ouverture.
 
 Le dépôt est désormais public. Pour un déploiement futur dans un dépôt privé : selon le forfait GitHub du propriétaire, Pages peut nécessiter un forfait payant compatible. Si GitHub le signale, activer un forfait compatible ou décider explicitement de rendre le dépôt public. Aucun changement de visibilité n’est effectué automatiquement.
 
-Les changements de source doivent être relus dans la PR ; le workflow déploie après fusion sur `main`. Pour revenir à une version précédente, rétablir son code par commit sur `main` et laisser tous les contrôles s’exécuter.
+Les changements de source sont relus dans la PR ; la publication suit la release stable. Pour revenir à une version précédente, rétablir son code sur `main` puis publier une nouvelle release après validation des contrôles.

@@ -1,3 +1,4 @@
+import { playerMageSVG } from '../player-mage.js';
 import { avatarColor, normalizeAvatar } from '../../domain/duel.js';
 export const escapeHTML = (value) =>
   String(value).replace(
@@ -62,6 +63,12 @@ export function wizardSVG({ avatar, enemy, prefix = 'mage' } = {}) {
       : '#372e48';
   const hat = enemy?.hat ?? a.hat,
     feature = enemy?.feature ?? a.face;
+  if (player)
+    return playerMageSVG({
+      avatar: a,
+      prefix,
+      hat: hatSVG(hat, hat === 'crown' ? '#e7be62' : '#8055d9', accent, `${prefix}-hat`),
+    });
   const extraHair =
     player && a.style === 'braids'
       ? '<path d="M82 128v96m117-96v96" stroke-width="17" fill="none"/>'

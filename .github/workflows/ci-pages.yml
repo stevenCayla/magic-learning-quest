@@ -4,19 +4,64 @@ on:
     branches: [main, 'feat/**', 'fix/**']
   pull_request:
     branches: [main]
+  release:
+    types: [published]
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release publiée à vérifier et déployer (vide = contrôles uniquement)'
+        required: false
+        type: string
 permissions:
   contents: read
 concurrency:
-  group: pages-${{ github.workflow }}-${{ github.ref }}
+  group: pages-${{ github.workflow }}-${{ inputs.release_tag || github.ref }}
   cancel-in-progress: true
 jobs:
+  release:
+    name: Schedule published release from main
+    if: github.event_name == 'release' && github.event.release.prerelease == false
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
+    steps:
+      - uses: actions/github-script@v7
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              ...context.repo, workflow_id: 'ci-pages.yml', ref: 'main',
+              inputs: { release_tag: process.env.RELEASE_TAG }
+            });
   quality:
     name: Lint, unit, build & browser tests
+    if: github.event_name != 'release'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.release_tag || github.sha }}
+          fetch-depth: 0
+      - name: Validate published release and source commit
+        if: github.event_name == 'workflow_dispatch' && inputs.release_tag != ''
+        uses: actions/github-script@v7
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        with:
+          script: |
+            const tag = process.env.RELEASE_TAG;
+            if (!/^v\d+\.\d+\.\d+(?:-[0-9A-Za-z]+(?:[.-][0-9A-Za-z]+)*)?$/.test(tag))
+              throw new Error('Le tag doit être au format v1.2.3');
+            const { data: release } = await github.rest.repos.getReleaseByTag({ ...context.repo, tag });
+            if (release.draft || release.prerelease) throw new Error('Une release stable publiée est requise');
+            const { execFileSync } = require('node:child_process');
+            const sha = ref => execFileSync('git', ['rev-parse', ref], { encoding:'utf8' }).trim();
+            if (sha('HEAD') !== sha(`${tag}^{commit}`)) throw new Error('Le commit construit ne correspond pas au tag');
+            execFileSync('git', ['merge-base', '--is-ancestor', 'HEAD', 'origin/main']);
+            core.info(`Release ${tag} : commit ${sha('HEAD')}`);
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -25,6 +70,13 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: npm run build
+        env:
+          RELEASE_VERSION: ${{ inputs.release_tag || '' }}
+      - name: Verify release build metadata
+        if: github.event_name == 'workflow_dispatch' && inputs.release_tag != ''
+        run: node scripts/check-release.js
+        env:
+          RELEASE_VERSION: ${{ inputs.release_tag }}
       - run: npx playwright install --with-deps chromium webkit
       - run: npm run test:e2e
       - uses: actions/upload-artifact@v4
@@ -36,13 +88,13 @@ jobs:
             test-results/
           retention-days: 14
       - uses: actions/upload-pages-artifact@v3
-        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        if: github.event_name == 'workflow_dispatch' && inputs.release_tag != ''
         with:
           path: dist
   deploy:
     name: Deploy GitHub Pages
     needs: quality
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    if: github.event_name == 'workflow_dispatch' && inputs.release_tag != ''
     runs-on: ubuntu-latest
     permissions:
       pages: write

@@ -1,10 +1,6 @@
 import './style.css';
 import { STAGES } from './domain/progression.js';
-import {
-  adventureFor,
-  journeyFor,
-  resetAdventure,
-} from './domain/adventures.js';
+import { adventureFor, journeyFor, resetAdventure } from './domain/adventures.js';
 import { mountAdventureReset } from './ui/adventure-settings.js';
 import { openClockLesson } from './ui/clock-lesson.js';
 import { installZoomGuard } from './ui/zoom-guard.js';
@@ -14,6 +10,10 @@ import { mountCustomizer } from './ui/customize.js';
 import { normalizeAvatar } from './domain/duel.js';
 import './ui/battle/battle.css';
 import './ui/adventures.css';
+import './ui/onboarding.css';
+import { mountOnboarding, installCreationViewport } from './ui/onboarding.js';
+import { updateCreation, completeCreation } from './domain/onboarding.js';
+import { versionMarkup } from './ui/version.js';
 import { createSoundPlayer } from './ui/sound.js';
 const sounds = createSoundPlayer();
 
@@ -23,20 +23,17 @@ let warning = restored.warning;
 let screen = 'home';
 let selectedAdventure = 'clock';
 installZoomGuard();
+installCreationViewport();
 let installPrompt = null;
 const app = document.querySelector('#app');
 const escape = (str) =>
   String(str).replace(
     /[&<>"']/g,
-    (c) =>
-      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[
-        c
-      ],
+    (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c],
   );
 const persist = () => {
   if (!save(state)) {
-    warning =
-      'La sauvegarde est indisponible. Garde cette page ouverte pour conserver ta partie.';
+    warning = 'La sauvegarde est indisponible. Garde cette page ouverte pour conserver ta partie.';
     const main = document.querySelector('#main');
     if (main && !main.querySelector('.notice')) {
       const notice = document.createElement('p');
@@ -73,6 +70,7 @@ const battle = createBattleController({
   sounds,
 });
 function start(mode) {
+  if (!state.onboarding.completed) return home();
   selectedAdventure = mode;
   screen = mode;
   battle.start(mode);
@@ -82,6 +80,10 @@ function navButton(id, icon, title) {
 }
 function shell(content) {
   document.documentElement.classList.toggle('home-screen', screen === 'home');
+  if (!state.onboarding.completed) {
+    app.innerHTML = `<div class="app-shell is-home onboarding-welcome"><main id="main" tabindex="-1">${warning ? `<p class="notice" role="status">${escape(warning)}</p>` : ''}${content}</main><div id="toast" role="status" class="toast"></div></div>`;
+    return;
+  }
   if (['clock', 'math'].includes(screen)) {
     app.innerHTML = `<div class="app-shell in-exercise"><main id="main" tabindex="-1">${warning ? `<p class="notice" role="status">${escape(warning)}</p>` : ''}${content}</main><div id="toast" role="status" class="toast"></div></div>`;
     return;
@@ -95,19 +97,48 @@ function shell(content) {
     e.preventDefault();
     navigate('home');
   });
-  app
-    .querySelectorAll('[data-install]')
-    .forEach((b) => b.addEventListener('click', install));
+  app.querySelectorAll('[data-install]').forEach((b) => b.addEventListener('click', install));
 }
 function home() {
+  const firstLaunch = !state.onboarding.completed;
+  if (firstLaunch && state.onboarding.step !== 'welcome') {
+    shell('<div id="creation-root"></div>');
+    mountOnboarding(document.querySelector('#creation-root'), {
+      getState: () => state,
+      change: (value) => {
+        state = updateCreation(state, value);
+        persist();
+      },
+      complete: () => {
+        state = completeCreation(state);
+        persist();
+        home();
+        document.querySelector('#main').focus({ preventScroll: true });
+      },
+      backHome: () => {
+        state = updateCreation(state, { step: 'welcome' });
+        persist();
+        home();
+      },
+    });
+    return;
+  }
   const card = (mode) => {
     const p = adventureFor(state, mode),
       j = journeyFor(p.xp);
     return `<button class="arcade-menu-button ${mode === 'clock' ? 'clock' : 'math'}-button" id="choose-${mode}"><span aria-hidden="true">${mode === 'clock' ? '◷' : '✦'}</span><span>${mode === 'clock' ? 'Horloge magique' : 'Maths magiques'}<small data-testid="${mode}-progress">${starsMarkup(j.stars)} · Niveau ${j.level}/20${j.complete ? ' · Maîtrise !' : ''}</small></span><span aria-hidden="true">➜</span></button>`;
   };
   shell(
-    `<section class="arcade-home" aria-label="Accueil de l’académie d’Astréa"><button class="home-settings" id="home-settings" aria-label="Réglages" title="Réglages"><span aria-hidden="true">⚙</span></button><header class="arcade-brand"><p>L’ACADÉMIE D’ASTRÉA</p><h1 aria-label="Magic Learning Quest"><span>MAGIC</span><span>QUEST</span></h1><p class="arcade-subtitle">Deux aventures. Trois étoiles chacune !</p></header><div class="arcade-heroes" role="img" aria-label="Un apprenti mage, une chouette et un petit dragon"></div><div class="arcade-home-bottom"><div class="arcade-home-progress"><span>🧙 ${escape(state.avatar.name)}</span><strong>À toi de jouer !</strong></div><div class="arcade-menu" aria-label="Choisis ton entraînement">${card('clock')}${card('math')}<button class="arcade-menu-button adventure-button" id="explore" aria-label="Explorer mes aventures"><span aria-hidden="true">♜</span><span>Mes aventures<small>Horloge et Maths : chacune son chemin</small></span><span aria-hidden="true">➜</span></button></div></div></section><section class="home-rotate" aria-label="Accueil en portrait"><div aria-hidden="true">▭ ↻ ▯</div><h2>Tourne ton téléphone à la verticale</h2><p>L’accueil se consulte en portrait.<br>Les duels se jouent en paysage.</p></section>`,
+    `<section class="arcade-home" aria-label="Accueil de l’académie d’Astréa">${firstLaunch ? '' : '<button class="home-settings" id="home-settings" aria-label="Réglages" title="Réglages"><span aria-hidden="true">⚙</span></button>'}<header class="arcade-brand"><p>L’ACADÉMIE D’ASTRÉA</p><h1 aria-label="Magic Learning Quest"><span>MAGIC</span><span>QUEST</span></h1><p class="arcade-subtitle">Deux aventures. Trois étoiles chacune !</p></header><div class="arcade-heroes" role="img" aria-label="Un apprenti mage, une chouette et un petit dragon"></div><div class="arcade-home-bottom">${firstLaunch ? '<p class="welcome-promise">Ton aventure commence ici !</p><button class="arcade-menu-button clock-button welcome-start" id="begin-creation"><span aria-hidden="true">✦</span> Commencer</button>' : `<div class="arcade-home-progress"><span>🧙 ${escape(state.avatar.name)}</span><strong>À toi de jouer !</strong></div><div class="arcade-menu" aria-label="Choisis ton entraînement">${card('clock')}${card('math')}<button class="arcade-menu-button adventure-button" id="explore" aria-label="Explorer mes aventures"><span aria-hidden="true">♜</span><span>Mes aventures<small>Horloge et Maths : chacune son chemin</small></span><span aria-hidden="true">➜</span></button></div>`}${versionMarkup()}</div></section><section class="home-rotate" aria-label="Accueil en portrait"><div aria-hidden="true">▭ ↻ ▯</div><h2>Tourne ton téléphone à la verticale</h2><p>L’accueil se consulte en portrait.<br>Les duels se jouent en paysage.</p></section>`,
   );
+  if (firstLaunch) {
+    document.querySelector('#begin-creation').onclick = () => {
+      state = updateCreation(state, { step: 'choice' });
+      persist();
+      home();
+    };
+    return;
+  }
   document.querySelector('#home-settings').onclick = () => navigate('settings');
   document.querySelector('#explore').onclick = () => navigate('adventure');
   document.querySelector('#choose-clock').onclick = () => start('clock');
@@ -121,14 +152,10 @@ function adventure() {
     `<div class="page-heading"><div><p class="eyebrow">DEUX AVENTURES INDÉPENDANTES</p><h1>Mes aventures<span class="gold">.</span></h1><p>20 niveaux pour chaque étoile. Trois étoiles à gagner par aventure.</p></div><div class="adventure-links"><button class="secondary" id="open-grimoire">♜ Grimoire</button><button class="secondary" id="open-mage">✦ Mon mage</button></div></div>${adventureTabs()}<section class="quest-summary glass"><span class="quest-icon">${current.icon}</span><div><span class="eyebrow">AVENTURE ${modeLabel(selectedAdventure).toUpperCase()} · ÉTOILE ${j.targetStar}/3</span><h2>${current.name}</h2><p>${starsMarkup(j.stars)} · Niveau ${j.level}/20 · ${progress.xp} XP</p><progress aria-label="Progression de l’étoile en cours" max="2000" value="${j.cycleXP}"></progress><p>${j.complete ? 'Trois étoiles maîtrisées ! Continue à t’entraîner.' : `${j.remaining} XP avant le prochain niveau · ${2000 - j.cycleXP} XP avant la prochaine étoile`}</p><p>${selectedAdventure === 'clock' ? 'Lis l’horloge et réponds au format 24 h, en suivant Matin ou Après-midi.' : 'Additionne, soustrais et multiplie. Chaque étoile augmente la difficulté.'}</p></div><div class="quest-actions"><button class="primary" id="train-adventure">Jouer · ${modeLabel(selectedAdventure)}</button>${selectedAdventure === 'clock' ? '<button class="secondary" id="read-lesson">📖 Relire la leçon</button>' : ''}</div></section><ol class="journey">${STAGES.map((s, i) => `<li class="journey-stop ${i < j.stageIndex || j.complete ? 'complete' : i === j.stageIndex ? 'current' : 'locked'}" ${i === j.stageIndex ? 'aria-current="step"' : ''}><span class="stop-number">${i < j.stageIndex ? '✓' : i + 1}</span><span class="stop-icon" aria-hidden="true">${s.icon}</span><div><small>${i === j.stageIndex ? 'TU ES ICI' : `NIVEAU ${i + 1}`}</small><h3>${s.name}</h3><p>${s.story}</p>${s.reward ? `<span class="reward-label">🎁 ${s.reward}</span>` : ''}</div></li>`).join('')}</ol>`,
   );
   bindAdventureTabs(adventure);
-  document.querySelector('#open-grimoire').onclick = () =>
-    navigate('collection');
+  document.querySelector('#open-grimoire').onclick = () => navigate('collection');
   document.querySelector('#open-mage').onclick = () => navigate('settings');
-  document.querySelector('#train-adventure').onclick = () =>
-    start(selectedAdventure);
-  document
-    .querySelector('#read-lesson')
-    ?.addEventListener('click', () => openClockLesson());
+  document.querySelector('#train-adventure').onclick = () => start(selectedAdventure);
+  document.querySelector('#read-lesson')?.addEventListener('click', () => openClockLesson());
 }
 function collection() {
   const p = adventureFor(state, selectedAdventure);
@@ -168,11 +195,7 @@ function settings() {
         'Enchanteur · Intermédiaire',
         'Calculs jusqu’à 100, tables de 2, 3, 4, 5, 6, 8 et 10.',
       ],
-      [
-        'advanced',
-        'Grand mage · Avancé',
-        'Calculs jusqu’à 500, toutes les tables de 2 à 12.',
-      ],
+      ['advanced', 'Grand mage · Avancé', 'Calculs jusqu’à 500, toutes les tables de 2 à 12.'],
     ]
       .map(
         ([v, t, d]) =>
@@ -225,17 +248,14 @@ function settings() {
         `${modeLabel(mode)} : 0 XP · 0/3 étoiles · 0 points`;
     },
   });
-  app
-    .querySelectorAll('input[name=difficulty], input[name=clockLevel]')
-    .forEach(
-      (input) =>
-        (input.onchange = () => {
-          state.settings[input.name] = input.value;
-          persist();
-          document.querySelector('#settings-status').textContent =
-            'Nouveaux réglages enregistrés.';
-        }),
-    );
+  app.querySelectorAll('input[name=difficulty], input[name=clockLevel]').forEach(
+    (input) =>
+      (input.onchange = () => {
+        state.settings[input.name] = input.value;
+        persist();
+        document.querySelector('#settings-status').textContent = 'Nouveaux réglages enregistrés.';
+      }),
+  );
   document.querySelector('#relaxed').onchange = (e) => {
     state.settings.relaxed = e.target.checked;
     persist();
@@ -259,6 +279,11 @@ function settings() {
 }
 function navigate(next) {
   battle.stop();
+  if (!state.onboarding.completed) {
+    screen = 'home';
+    home();
+    return;
+  }
   screen = next;
   (({ home, adventure, settings, collection })[next] ?? home)();
   window.scrollTo(0, 0);
@@ -284,12 +309,8 @@ for (const event of ['online', 'offline'])
   window.addEventListener(event, () => {
     const connection = document.querySelector('#connection');
     if (!connection) return;
-    connection.textContent = navigator.onLine
-      ? 'Prêt à explorer'
-      : 'Hors connexion';
-    document
-      .querySelector('.online-dot')
-      .classList.toggle('offline', !navigator.onLine);
+    connection.textContent = navigator.onLine ? 'Prêt à explorer' : 'Hors connexion';
+    document.querySelector('.online-dot').classList.toggle('offline', !navigator.onLine);
   });
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () =>
