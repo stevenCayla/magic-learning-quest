@@ -48,7 +48,7 @@ test('un nouveau niveau et chaque nouvelle étoile restaurent toute la vie', () 
     assert.equal(r.state.adventures.math.levelStartCorrect, r.state.adventures.math.cycleCorrect);
   }
 });
-test('recommencer efface seulement les XP et la maîtrise du niveau non terminé', () => {
+test('recommencer rend toute la vie sans rien retirer de ce qui est gagné', () => {
   let s = freshState();
   s.adventures.clock.xp = 550;
   s.adventures.clock.score = 7500;
@@ -60,9 +60,9 @@ test('recommencer efface seulement les XP et la maîtrise du niveau non terminé
   for (let i = 0; i < 4; i++) s = reply(s, 'clock', false).state;
   const before = structuredClone(s),
     next = restartLevel(s, 'clock');
-  assert.equal(next.adventures.clock.xp, 500);
+  assert.equal(next.adventures.clock.xp, 550);
   assert.equal(next.adventures.clock.health, 100);
-  assert.equal(next.adventures.clock.cycleCorrect, 21);
+  assert.equal(next.adventures.clock.cycleCorrect, 23);
   assert.equal(next.adventures.clock.defeats, 1);
   assert.equal(journeyFor(next.adventures.clock.xp).level, 6);
   for (const key of ['score', 'bestStreak', 'rewards'])
@@ -71,7 +71,7 @@ test('recommencer efface seulement les XP et la maîtrise du niveau non terminé
     assert.deepEqual(next[key], before[key]);
   assert.deepEqual(next.adventures.math, before.adventures.math);
   assert.deepEqual(s, before);
-  assert.equal(next.xp, 790);
+  assert.equal(next.xp, 840);
   assert.throws(() => restartLevel(next, 'clock'));
   assert.throws(() => restartLevel(next, 'unknown'));
 });

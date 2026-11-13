@@ -96,18 +96,15 @@ export function resetAdventure(state, mode) {
   return next;
 }
 
-// A defeat resets only the unfinished level, never a previous level or earned star.
+// A defeat costs nothing already earned: the mage gets a full life back and tries again.
 export function restartLevel(state, mode) {
   if (!ADVENTURE_MODES.includes(mode)) throw new Error('Aventure inconnue');
   const previous = adventureFor(state, mode);
   if (previous.health !== 0) throw new Error('Le duel n’est pas perdu');
   const next = structuredClone(state);
   const progress = next.adventures[mode];
-  progress.xp -= progress.xp % LEVEL_XP;
-  progress.cycleCorrect = progress.levelStartCorrect;
   progress.health = MAX_HEALTH;
   progress.streak = 0;
-  next.xp = next.adventures.clock.xp + next.adventures.math.xp;
   next.streak = 0;
   return next;
 }

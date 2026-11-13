@@ -203,14 +203,14 @@ export function encounter(xp) {
     ...journey,
   };
 }
-export const COUNTDOWN_MS = 5000;
 export const SPELL_MS = 1800;
-// One injectable clock for the introduction, questions and spell: never count hidden/portrait time.
+// A success stays on screen this long before the next question, unless the player moves on.
+export const NEXT_MS = 3000;
+// One injectable clock for questions and spells: never count hidden, paused or portrait time.
 export class DuelClock {
   constructor(now = 0) {
-    this.phase = 'countdown';
+    this.phase = 'intro';
     this.last = now;
-    this.introMs = 0;
     this.answerMs = 0;
     this.spellMs = 0;
     this.wasBlocked = false;
@@ -222,21 +222,19 @@ export class DuelClock {
       this.wasBlocked = blocked;
       return this.phase;
     }
-    if (this.phase === 'countdown') {
-      this.introMs = Math.min(COUNTDOWN_MS, this.introMs + delta);
-      if (this.introMs === COUNTDOWN_MS) {
-        this.phase = 'active';
-        this.answerMs = 0;
-      }
-    } else if (this.phase === 'active') this.answerMs += delta;
+    if (this.phase === 'active') this.answerMs += delta;
     else if (this.phase === 'success' || this.phase === 'failure-cast') {
       this.spellMs += delta;
       if (this.phase === 'failure-cast' && this.spellMs >= SPELL_MS) this.phase = 'failure';
     }
     return this.phase;
   }
-  get count() {
-    return Math.max(0, Math.ceil((COUNTDOWN_MS - this.introMs) / 1000));
+  // The duel starts when the player accepts the challenge.
+  begin(now) {
+    if (this.phase !== 'intro') return;
+    this.last = now;
+    this.answerMs = 0;
+    this.phase = 'active';
   }
   result(correct, now) {
     this.last = now;
@@ -247,7 +245,6 @@ export class DuelClock {
     this.last = now;
     this.answerMs = 0;
     this.spellMs = 0;
-    this.phase = newEncounter ? 'countdown' : 'active';
-    if (newEncounter) this.introMs = 0;
+    this.phase = newEncounter ? 'intro' : 'active';
   }
 }

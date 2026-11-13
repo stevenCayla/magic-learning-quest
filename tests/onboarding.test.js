@@ -31,6 +31,8 @@ test('brouillon et retour entre étapes préservent les choix sans toucher au pe
   const s = freshState(),
     original = structuredClone(s);
   let next = updateCreation(s, { step: 'choice' });
+  assert.equal(next.onboarding.selected, 'boy');
+  assert.equal(next.onboarding.avatar.robe, characterPreset('boy').robe);
   next = updateCreation(next, { kind: 'girl' });
   next = updateCreation(next, { step: 'customize' });
   next = updateCreation(next, { key: 'robe', value: 'blue' });

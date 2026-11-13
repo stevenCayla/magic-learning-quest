@@ -37,7 +37,10 @@ export function restoreOnboarding(value, xp = 0) {
     completed: value.completed,
     selected,
     step: step === 'customize' && !selected ? 'choice' : step,
-    avatar: { ...normalizeAvatar(value.avatar, xp), name: cleanMageName(value.avatar?.name) },
+    avatar: {
+      ...normalizeAvatar(value.avatar, xp),
+      name: cleanMageName(value.avatar?.name),
+    },
   };
 }
 export function updateCreation(state, change) {
@@ -49,6 +52,11 @@ export function updateCreation(state, change) {
       throw new Error('Étape inconnue');
     if (change.step === 'customize' && !creation.selected) throw new Error('Choisis ton mage');
     creation.step = change.step;
+    // The choice screen opens with the boy preselected; the draft name is kept.
+    if (change.step === 'choice' && !creation.selected) {
+      creation.selected = 'boy';
+      creation.avatar = characterPreset('boy', creation.avatar.name);
+    }
   }
   if (change.kind && change.kind !== creation.selected) {
     creation.selected = change.kind;

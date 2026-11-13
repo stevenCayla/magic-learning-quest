@@ -1,0 +1,1162 @@
+/* Arcade skin of the duel arena: gold-framed panels, chunky bars and toy-like keys.
+   Loaded after battle.css; it restyles the same structure without changing its layout rules. */
+.battle-shell {
+  color: #fff6dc;
+  font-family:
+    ui-sans-serif,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
+}
+.battle-toolbar {
+  background: linear-gradient(#171224cc, #17122400);
+  border-bottom: 0;
+}
+.battle-tools {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.battle-tool {
+  display: grid;
+  place-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 9px;
+  border: 2px solid #735225;
+  border-radius: 13px;
+  color: #4a3017;
+  background: linear-gradient(#fff0b4, #eabb54);
+  box-shadow:
+    0 3px #35223c,
+    0 0 0 2px #ffe8a4;
+  font-weight: 900;
+}
+.battle-tool svg {
+  display: block;
+  width: 24px;
+  height: 24px;
+}
+.battle-sound {
+  padding: 0 9px;
+}
+.battle-sound[aria-pressed='false'] {
+  color: #3a3560;
+  background: linear-gradient(#dcd8ee, #a09ac4);
+}
+.battle-title h1 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: system-ui, sans-serif;
+  font-size: clamp(18px, 2vw, 26px);
+  font-weight: 800;
+  letter-spacing: 0;
+  color: #fff1cf;
+  text-shadow: 0 3px 1px #2a2049;
+}
+.battle-title h1::before,
+.battle-title h1::after {
+  content: '';
+  width: 34px;
+  height: 2px;
+  border-radius: 1px;
+  background: linear-gradient(90deg, #ffdc6300, #ffdc63);
+}
+.battle-title h1::after {
+  transform: scaleX(-1);
+}
+.battle-title p {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  padding: 1px 10px;
+  border: 1px solid #e4c87199;
+  border-radius: 20px;
+  background: #21194acc;
+  color: #fff6dc;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+.battle-stars {
+  display: inline-flex;
+  gap: 2px;
+}
+.battle-stars svg {
+  width: 12px;
+  height: 12px;
+  fill: none;
+  stroke: #e4c871;
+  stroke-width: 4;
+  stroke-linejoin: round;
+}
+.battle-stars svg.is-full {
+  fill: #ffdc63;
+  stroke: #ffdc63;
+}
+.battle-xp {
+  padding: 6px 12px;
+  border: 2px solid #e4c871;
+  border-radius: 30px;
+  background: #21194a;
+  color: #ffeaa1;
+  font-size: 14px;
+  font-weight: 800;
+}
+/* Fighters */
+.fighter figcaption {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'label points'
+    'name name'
+    'bar bar';
+  align-items: center;
+  gap: 2px 4px;
+  padding: 6px 8px 8px;
+  text-align: left;
+  border: 2px solid #e8c96f;
+  border-radius: 16px;
+  background: linear-gradient(145deg, #29224fee, #191b48ee);
+  box-shadow:
+    inset 0 0 0 2px #514568,
+    0 4px 0 #151533;
+  backdrop-filter: none;
+}
+.fighter figcaption > span {
+  grid-area: label;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #fff0c7;
+}
+.fighter figcaption strong,
+.fighter-player figcaption strong,
+.fighter-enemy figcaption strong {
+  grid-area: name;
+  margin-top: 0;
+  font-weight: 900;
+  color: #ffdc63;
+}
+.fighter figcaption small {
+  grid-area: points;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+  color: #fff6dc;
+}
+.fighter progress {
+  grid-area: bar;
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  height: 14px;
+  margin: 2px 0 0;
+  box-sizing: border-box;
+  overflow: hidden;
+  border: 2px solid #303023;
+  border-radius: 8px;
+  background: #171224;
+}
+.fighter progress::-webkit-progress-bar {
+  background: #171224;
+}
+.fighter #player-health::-webkit-progress-value {
+  background: linear-gradient(#d3fb8e, #9bd748 45%, #75af2a);
+}
+.fighter #player-health::-moz-progress-bar {
+  background: linear-gradient(#d3fb8e, #9bd748 45%, #75af2a);
+}
+.fighter #enemy-health::-webkit-progress-value {
+  background: linear-gradient(#e79bea, #9d18a1);
+}
+.fighter #enemy-health::-moz-progress-bar {
+  background: linear-gradient(#e79bea, #9d18a1);
+}
+.player-critical .fighter #player-health::-webkit-progress-value {
+  background: linear-gradient(#ffb27a, #e2531f);
+}
+.player-critical .fighter #player-health::-moz-progress-bar {
+  background: linear-gradient(#ffb27a, #e2531f);
+}
+/* Panels */
+.duel-desk {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  align-items: stretch;
+  gap: 8px;
+}
+.in-exercise .battle-shell .exercise-board,
+.in-exercise .battle-shell .answer-board {
+  box-sizing: border-box;
+  padding: 10px;
+  border: 3px solid #e8c96f;
+  border-radius: 22px;
+  background: linear-gradient(145deg, #29224ff2, #191b48f7);
+  box-shadow:
+    inset 0 0 0 2px #514568,
+    0 5px 0 #151533;
+}
+.in-exercise .battle-shell .answer-board {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.in-exercise .battle-shell .tag {
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0;
+  color: #fff2c9;
+}
+.in-exercise .battle-shell #timer {
+  font-size: 14px;
+  font-weight: 900;
+  color: #ffdc63;
+}
+.in-exercise .battle-shell #timer.urgent {
+  font-size: 16px;
+  color: #ff9a4d;
+}
+.in-exercise .battle-shell .timer-track {
+  height: 10px;
+  margin: 4px 0 8px;
+  box-sizing: border-box;
+  overflow: hidden;
+  border: 2px solid #303023;
+  border-radius: 6px;
+  background: #171224;
+}
+.in-exercise .battle-shell .timer-track span {
+  background: linear-gradient(90deg, #feca42, #fef765);
+}
+.in-exercise .battle-shell .exercise-meta:has(.urgent) + .timer-track span {
+  background: linear-gradient(90deg, #e2531f, #ff9a4d);
+}
+.in-exercise .battle-shell .exercise-board h2 {
+  font-family: system-ui, sans-serif;
+  font-size: 17px;
+  font-weight: 800;
+  color: #fff1cf;
+  text-shadow: 0 2px 1px #2a2049;
+}
+.battle-shell .time-period {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 6px 0 0;
+  padding: 1px 10px;
+  border: 1px solid #e4c87199;
+  border-radius: 20px;
+  background: #21194a99;
+  color: #ffeaa1;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+.battle-shell .time-period svg {
+  width: 14px;
+  height: 14px;
+  color: #ffdc63;
+}
+.in-exercise .battle-shell .exercise-hint {
+  font-size: 11px;
+  font-style: italic;
+  color: #fff4d8;
+}
+/* Clock: cream face, gold rim, violet hours and orange minutes */
+.battle-shell .clock-rim {
+  fill: #e8c96f;
+  stroke: #303023;
+  stroke-width: 4;
+}
+.battle-shell .clock-face {
+  fill: #fff6dc;
+  stroke: none;
+}
+.battle-shell .clock-marks {
+  stroke: #24186b;
+}
+.battle-shell .clock-numbers {
+  fill: #24186b;
+  font-family: inherit;
+  font-weight: 900;
+}
+.battle-shell .hour-hand {
+  stroke: #37047a;
+  stroke-width: 9;
+}
+.battle-shell .minute-hand {
+  stroke: #e2531f;
+  stroke-width: 5;
+}
+/* Maths: the sum sits on a cream tile, like the clock face */
+.in-exercise .battle-shell .math-tile {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  margin: 8px 0 4px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border: 3px solid #303023;
+  border-radius: 20px;
+  background: #fff6dc;
+  box-shadow:
+    inset 0 0 0 4px #e8c96f,
+    0 4px 0 #151533;
+}
+.in-exercise .battle-shell .math-problem {
+  min-height: 0;
+  color: #24186b;
+  font-weight: 900;
+  line-height: 1;
+}
+.in-exercise .battle-shell .math-problem .operator {
+  color: #9d18a1;
+}
+.battle-shell .math-equals {
+  margin: 0;
+  font-size: clamp(20px, 2.6vw, 32px);
+  font-weight: 900;
+  line-height: 1;
+  color: #37047a;
+}
+/* Answer */
+.in-exercise .battle-shell .answer-field,
+.in-exercise .battle-shell #math-answer {
+  border: 2px solid #eeeaff;
+  border-radius: 13px;
+  background: linear-gradient(#d4e0ff, #a5bbed);
+  color: #192345;
+  font-weight: 900;
+  box-shadow: none;
+}
+.in-exercise .battle-shell .answer-field.selected,
+.in-exercise .battle-shell #math-answer {
+  border-color: #fff0a6;
+  box-shadow:
+    0 0 0 3px #e5aa35,
+    0 0 14px #ffdb6299;
+}
+.in-exercise .battle-shell .answer-field small {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-weight: 700;
+  color: #3b2a70;
+}
+.in-exercise .battle-shell .answer-field small::before {
+  content: '';
+  width: 12px;
+  height: 6px;
+  border-radius: 3px;
+  background: #37047a;
+}
+.in-exercise .battle-shell #minute small::before {
+  width: 18px;
+  height: 3px;
+  background: #e2531f;
+}
+.battle-shell .colon {
+  color: #fff6dc;
+  font-weight: 900;
+}
+.in-exercise .battle-shell .key {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 2px solid #dcc98399;
+  border-radius: 13px;
+  background: #252046;
+  box-shadow: 0 3px 0 #151533;
+  color: #fff6dc;
+  font-weight: 900;
+}
+.in-exercise .battle-shell .key:hover {
+  background: #3a3170;
+}
+.in-exercise .battle-shell .key[data-key='clear'],
+.in-exercise .battle-shell .key[data-key='delete'] {
+  border-color: #735225;
+  background: linear-gradient(#fff0b4, #eabb54);
+  box-shadow: 0 3px #35223c;
+  color: #4a3017;
+}
+.in-exercise .battle-shell .key svg {
+  width: 24px;
+  height: 24px;
+}
+.in-exercise .battle-shell .validate {
+  border: 3px solid #303023;
+  border-radius: 18px;
+  background: linear-gradient(#d3fb8e, #9bd748 45%, #75af2a);
+  box-shadow:
+    inset 0 3px 0 #f7ffd5aa,
+    inset 0 -4px 0 #57842488,
+    0 4px 0 #140c1f,
+    0 0 0 2px #e8c96f;
+  color: #24351e;
+  text-shadow: 0 1px 0 #ffffff70;
+  font-weight: 900;
+  letter-spacing: -0.3px;
+  text-transform: uppercase;
+}
+.battle-shell[data-mode='math'] .validate {
+  background: linear-gradient(#caeaff, #82cbe9 45%, #4c98ca);
+  box-shadow:
+    inset 0 3px 0 #e3f9ffbb,
+    inset 0 -4px 0 #386ca188,
+    0 4px 0 #140c1f,
+    0 0 0 2px #e8c96f;
+  color: #193656;
+}
+/* Result banner */
+.duel-feedback {
+  border: 3px solid #e8c96f;
+  border-radius: 22px;
+  background: radial-gradient(ellipse at 30% 30%, #275749, #171d32 80%);
+  box-shadow:
+    inset 0 0 0 2px #bbebd066,
+    0 5px 0 #151533;
+}
+.duel-feedback h3 {
+  font:
+    800 26px/1.05 system-ui,
+    sans-serif;
+  letter-spacing: -0.6px;
+  color: #d8ffe8;
+  text-shadow: 0 3px 1px #14000b;
+}
+.duel-feedback p {
+  color: #d7ffe5;
+  font-weight: 700;
+}
+.duel-feedback p strong {
+  color: #ffdc63;
+  font-weight: 900;
+}
+.duel-feedback small {
+  font-style: italic;
+  color: #fff4d8;
+}
+.duel-feedback.retry {
+  border-color: #e8c96f;
+  background: radial-gradient(ellipse at 30% 30%, #56375c, #171d32 80%);
+  box-shadow:
+    inset 0 0 0 2px #d7a0bb66,
+    0 5px 0 #151533;
+}
+.duel-feedback.retry h3 {
+  color: #ffe3c8;
+}
+.duel-feedback.retry p {
+  color: #fff1df;
+}
+/* Countdown and notices */
+.duel-intro h2,
+.rotate-notice h2,
+.rescue-celebration h2 {
+  font-family: system-ui, sans-serif;
+  font-weight: 800;
+  color: #fff1cf;
+  text-shadow: 0 3px 1px #2a2049;
+}
+#countdown-value,
+.battle-go {
+  font-family: 'Arial Black', 'Trebuchet MS', system-ui, sans-serif;
+  font-weight: 1000;
+}
+.in-exercise .battle-shell .math-problem {
+  flex: 0 0 auto;
+  width: auto;
+  font-family: inherit;
+}
+@media (max-width: 700px) {
+  .fighter figcaption {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'points'
+      'name'
+      'bar';
+  }
+  .fighter figcaption > span {
+    display: none;
+  }
+}
+@media (max-height: 340px) {
+  .in-exercise .battle-shell .exercise-hint {
+    display: none;
+  }
+}
+
+/* Fighters carry three stacked poses; the duel shows one at a time. */
+.fighter-portrait .pose-cast,
+.fighter-portrait .pose-hit,
+.is-casting .fighter-player .pose-idle,
+.is-enemy-casting .fighter-enemy .pose-idle,
+.is-casting.spell-hit .fighter-enemy .pose-idle,
+.is-enemy-casting.spell-hit .fighter-player .pose-idle,
+.player-defeated .fighter-player .pose-idle {
+  visibility: hidden;
+}
+.is-casting .fighter-player .pose-cast,
+.is-enemy-casting .fighter-enemy .pose-cast,
+.is-casting.spell-hit .fighter-enemy .pose-hit,
+.is-enemy-casting.spell-hit .fighter-player .pose-hit,
+.player-defeated .fighter-player .pose-hit {
+  visibility: visible;
+}
+.fighter .pose-cast .wand-arm,
+.fighter .pose-hit .wand-arm {
+  animation: none !important;
+}
+.fighter-portrait svg {
+  width: clamp(170px, 25vw, 340px);
+}
+
+/* Between two questions the centre shows a banner or a single panel. */
+.battle-shell:not([data-phase='active']) .duel-desk > .exercise-board,
+.battle-shell:not([data-phase='active']) .duel-desk > .answer-board {
+  visibility: hidden;
+}
+.duel-feedback {
+  position: absolute;
+  inset: 0 0 auto;
+  transform: none;
+  min-width: 0;
+  max-width: none;
+  padding: 10px 14px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px 10px;
+  text-align: left;
+  pointer-events: auto;
+  animation: panel-pop 260ms ease-out both;
+}
+.duel-feedback:empty {
+  display: none;
+}
+.duel-feedback h3 {
+  margin: 0;
+  white-space: nowrap;
+}
+.duel-feedback p {
+  margin: 2px 0 0;
+  font-size: 14px;
+}
+.duel-feedback p strong {
+  font-size: 20px;
+}
+.feedback-meta {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #d7ffe5;
+}
+.feedback-meta:empty {
+  display: none;
+}
+.feedback-meta .duel-unlock {
+  color: #ffeaa1;
+}
+.feedback-wait {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+}
+.feedback-wait b {
+  width: 46px;
+  height: 8px;
+  box-sizing: border-box;
+  border: 2px solid #303023;
+  border-radius: 5px;
+  background: #171224;
+  overflow: hidden;
+}
+.feedback-wait i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #bbebd0;
+}
+.duel-panel {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  box-sizing: border-box;
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  border: 3px solid #e8c96f;
+  border-radius: 22px;
+  background: linear-gradient(145deg, #29224ff2, #191b48f7);
+  box-shadow:
+    inset 0 0 0 2px #514568,
+    0 5px 0 #151533;
+  color: #fff6dc;
+  animation: panel-pop 260ms ease-out both;
+}
+.duel-panel[hidden],
+.duel-pause[hidden] {
+  display: none;
+}
+.duel-panel[data-panel='victory'] {
+  background: radial-gradient(ellipse at 50% 20%, #275749, #191b48 75%);
+}
+.duel-panel[data-panel='defeat'] {
+  background: radial-gradient(ellipse at 50% 20%, #56375c, #191b48 75%);
+}
+.panel-eyebrow {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  color: #fff0c7;
+}
+.panel-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  max-width: 100%;
+}
+.panel-title::before,
+.panel-title::after {
+  content: '';
+  flex: 0 0 30px;
+  height: 2px;
+  border-radius: 1px;
+  background: linear-gradient(90deg, #ffdc6300, #ffdc63);
+}
+.panel-title::after {
+  transform: scaleX(-1);
+}
+.panel-title svg {
+  flex: 0 0 14px;
+  height: 14px;
+  fill: #ffdc63;
+}
+.panel-title h2 {
+  margin: 0;
+  font:
+    800 clamp(20px, 3.3vw, 28px) / 1.15 system-ui,
+    sans-serif;
+  letter-spacing: -0.5px;
+  color: #fff1cf;
+  text-shadow: 0 3px 1px #2a2049;
+}
+.duel-panel[data-panel='victory'] .panel-title h2 {
+  font-size: clamp(24px, 3.8vw, 32px);
+  color: #d8ffe8;
+}
+.duel-panel[data-panel='defeat'] .panel-title h2 {
+  font-size: clamp(17px, 2.4vw, 22px);
+  color: #ffe3c8;
+}
+.panel-lead {
+  margin: 6px 0 0;
+  font-size: 14px;
+  font-style: italic;
+  color: #fff4d8;
+}
+.panel-text {
+  margin: 12px 0 0;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.45;
+  color: #fff1df;
+}
+.panel-note {
+  margin: 0;
+  font-size: 12px;
+  color: #fff4d8;
+}
+.panel-rules,
+.panel-goals {
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.panel-goals {
+  align-self: center;
+  gap: 5px;
+}
+.panel-rules li,
+.panel-goals li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.panel-rules svg,
+.panel-goals svg,
+.panel-goals i {
+  flex: 0 0 22px;
+  width: 22px;
+  height: 22px;
+  box-sizing: border-box;
+}
+.rule-good svg {
+  color: #ffdc63;
+}
+.rule-bad svg {
+  color: #ff7fa8;
+}
+.rule-goal svg {
+  color: #9be37a;
+}
+.panel-goals svg {
+  padding: 3px;
+  border-radius: 50%;
+  background: #4b6939;
+  color: #e2ff9c;
+}
+.panel-goals i {
+  border: 2px dashed #fff6dc66;
+  border-radius: 50%;
+}
+.panel-goals li:not(.is-done) {
+  color: #fff6dcb3;
+}
+.panel-pill {
+  margin: 10px 0 0;
+  padding: 2px 14px;
+  border: 2px solid #e4c871;
+  border-radius: 30px;
+  background: #21194a;
+  font-size: 14px;
+  font-weight: 900;
+  white-space: nowrap;
+  color: #ffeaa1;
+}
+.feedback-meta .panel-pill {
+  margin: 0;
+  padding: 1px 10px;
+  font-size: 12px;
+}
+.panel-go,
+.panel-quiet {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font: inherit;
+  cursor: pointer;
+}
+.panel-go {
+  min-height: 52px;
+  padding: 4px 14px;
+  border: 3px solid #303023;
+  border-radius: 18px;
+  background: linear-gradient(#d3fb8e, #9bd748 45%, #75af2a);
+  box-shadow:
+    inset 0 3px 0 #f7ffd5aa,
+    inset 0 -5px 0 #57842488,
+    0 5px 0 #140c1f,
+    0 0 0 3px #e8c96f;
+  color: #24351e;
+  text-shadow: 0 1px 0 #ffffff70;
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1.15;
+  letter-spacing: -0.3px;
+}
+.panel-go:active {
+  transform: translateY(3px);
+  box-shadow:
+    inset 0 3px 0 #f7ffd5aa,
+    inset 0 -5px 0 #57842488,
+    0 2px 0 #140c1f,
+    0 0 0 3px #e8c96f;
+}
+.panel-quiet {
+  min-height: 48px;
+  padding: 4px 12px;
+  border: 2px solid #dcc98399;
+  border-radius: 15px;
+  background: #252046;
+  box-shadow: 0 3px 0 #151533;
+  color: #fff6dc;
+  font-size: 15px;
+  font-weight: 800;
+}
+.panel-go svg,
+.panel-quiet svg {
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
+}
+.panel-go:focus-visible,
+.panel-quiet:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+.duel-panel > .panel-go,
+.panel-actions {
+  align-self: stretch;
+  margin-top: auto;
+}
+.duel-panel > .panel-go {
+  min-height: 58px;
+  font-size: 20px;
+}
+.panel-actions {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.6fr) minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+}
+.duel-feedback .panel-go {
+  min-height: 48px;
+  font-size: 15px;
+  text-align: center;
+}
+/* Correction: the question on the left, the reasoning on the right */
+.duel-panel[data-panel='correction'] {
+  display: grid;
+  grid-template-columns: minmax(110px, 0.6fr) minmax(0, 1fr);
+  gap: 14px;
+  padding: 10px 12px;
+  text-align: left;
+  align-items: stretch;
+}
+.correction-figure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 0;
+}
+.correction-figure .clock {
+  width: 100%;
+  max-width: 170px;
+  height: auto;
+}
+.correction-figure .math-tile {
+  padding: 12px 14px;
+  border: 3px solid #735225;
+  border-radius: 16px;
+  background: linear-gradient(#fffaf0, #f3e2bd);
+  color: #2a2049;
+  text-align: center;
+}
+.correction-figure .math-problem {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  font-size: clamp(24px, 4vw, 34px);
+  font-weight: 900;
+}
+.correction-figure .math-equals {
+  margin: 4px 0 0;
+  font-size: clamp(20px, 3.4vw, 28px);
+  font-weight: 900;
+  color: #2f7a3a;
+}
+.correction-legend {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.correction-legend span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.correction-legend span::before {
+  content: '';
+  border-radius: 3px;
+}
+.legend-hour {
+  color: #dcc6ff;
+}
+.legend-hour::before {
+  width: 12px;
+  height: 6px;
+  background: #b98cff;
+}
+.legend-minute {
+  color: #ffc49a;
+}
+.legend-minute::before {
+  width: 20px;
+  height: 3px;
+  background: #ff9a4d;
+}
+.correction-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.correction-text h2 {
+  margin: 0;
+  font:
+    800 20px/1.2 system-ui,
+    sans-serif;
+  color: #fff1cf;
+  text-shadow: 0 2px 1px #2a2049;
+}
+.correction-answers {
+  margin: 6px 0 0;
+  display: flex;
+  gap: 18px;
+}
+.correction-answers dt {
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff2c9;
+}
+.correction-answers dd {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 20px;
+  font-weight: 900;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.correction-answers svg {
+  width: 16px;
+  height: 16px;
+}
+.correction-answers .is-wrong {
+  color: #ffd0d6;
+}
+.correction-answers .is-right {
+  color: #d8ffe8;
+}
+.correction-steps {
+  margin: 8px 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13.5px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.correction-steps li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.correction-steps li > span:first-child {
+  flex: 0 0 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: #ffdc63;
+  color: #24351e;
+  font-size: 12px;
+  font-weight: 900;
+}
+.correction-text .panel-go {
+  margin-top: auto;
+  font-size: 15px;
+  white-space: nowrap;
+}
+/* Pause */
+.duel-pause {
+  position: absolute;
+  inset: 0;
+  z-index: 45;
+  display: grid;
+  place-items: center;
+  padding: 8px;
+  background: #120a2acc;
+}
+.duel-pause section {
+  width: min(320px, 100%);
+  max-height: 100%;
+  box-sizing: border-box;
+  padding: 16px 20px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  text-align: center;
+  border: 3px solid #e8c96f;
+  border-radius: 25px;
+  background: linear-gradient(145deg, #29224f, #191b48);
+  box-shadow:
+    inset 0 0 0 2px #514568,
+    0 5px 0 #151533;
+  color: #fff6dc;
+}
+.duel-pause .panel-lead {
+  margin: 0;
+}
+.duel-pause .panel-go {
+  min-height: 60px;
+  font-size: 22px;
+}
+.battle-paused .duel-pause * {
+  animation-play-state: running !important;
+}
+/* Damage dealt, floating above the target */
+.damage-pop {
+  position: absolute;
+  left: var(--to-x);
+  top: var(--to-y);
+  margin: 0;
+  opacity: 0;
+  transform: translate(-50%, -110%);
+  font-size: 30px;
+  font-weight: 900;
+  font-style: italic;
+  color: #ffdc63;
+  paint-order: stroke fill;
+  -webkit-text-stroke: 5px #28152f;
+  text-shadow: 0 4px 0 #bd653b;
+}
+.damage-pop.visible {
+  animation: damage-pop 1300ms ease-out both;
+}
+@keyframes damage-pop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -80%) scale(0.6);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(-50%, -130%) scale(1.15);
+  }
+  75% {
+    opacity: 1;
+    transform: translate(-50%, -190%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -220%) scale(1);
+  }
+}
+@keyframes panel-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+@media (max-height: 340px), (max-width: 620px) {
+  .duel-panel {
+    padding: 8px 12px;
+  }
+  .panel-eyebrow {
+    margin-bottom: 2px;
+    font-size: 10px;
+  }
+  .panel-lead,
+  .panel-rules,
+  .panel-goals,
+  .panel-text {
+    margin-top: 5px;
+    font-size: 12px;
+    gap: 4px;
+  }
+  .panel-rules svg,
+  .panel-goals svg,
+  .panel-goals i {
+    flex-basis: 18px;
+    width: 18px;
+    height: 18px;
+  }
+  .panel-pill {
+    margin-top: 5px;
+    font-size: 12px;
+  }
+  .duel-panel > .panel-go,
+  .panel-go {
+    min-height: 44px;
+    font-size: 16px;
+  }
+  .panel-quiet {
+    min-height: 44px;
+    font-size: 13px;
+  }
+  .correction-steps {
+    font-size: 11.5px;
+    gap: 3px;
+    margin: 4px 0;
+  }
+  .correction-text h2 {
+    font-size: 16px;
+  }
+  .correction-answers dd {
+    font-size: 16px;
+  }
+  .correction-legend {
+    display: none;
+  }
+  .correction-text .panel-go {
+    font-size: 12.5px;
+    white-space: normal;
+  }
+  .duel-feedback {
+    padding: 6px 10px;
+  }
+  .duel-pause section {
+    padding: 10px 16px 12px;
+    gap: 6px;
+  }
+  .duel-pause .panel-go {
+    min-height: 48px;
+    font-size: 18px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .duel-panel,
+  .duel-feedback {
+    animation: none;
+  }
+  .damage-pop.visible {
+    animation: none;
+    opacity: 1;
+    transform: translate(-50%, -160%);
+  }
+}
+/* Poses lean past the edge of the arena: never let that scroll the stage. */
+.battle-shell {
+  overflow: clip;
+}

@@ -12,6 +12,8 @@ async function fresh(page, viewport = { width: 390, height: 844 }) {
 }
 async function choose(page, kind = 'girl') {
   await page.getByRole('button', { name: 'Commencer', exact: true }).click();
+  await expect(page.locator('[data-kind=boy]')).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('#creation-back')).toHaveCount(0);
   await page.locator(`[data-kind=${kind}]`).click();
   await page.getByRole('button', { name: 'Continuer', exact: true }).click();
 }
@@ -48,10 +50,13 @@ for (const kind of ['boy', 'girl']) {
     await page.reload();
     await expect(page.locator('#begin-creation')).toHaveCount(0);
     await page.locator('#home-settings').click();
+    await expect(page.locator('#mage-card-name')).toHaveText('Lina');
+    await page.locator('#edit-mage').click();
     await expect(page.getByLabel('Ton nom de mage')).toHaveValue('Lina');
     await expect(
       page.getByRole('radio', { name: kind === 'boy' ? 'Garçon' : 'Fille', exact: true }),
     ).toBeChecked();
+    await page.getByRole('button', { name: 'Enregistrer mon mage' }).click();
     await page
       .getByRole('navigation', { name: 'Navigation mobile', exact: true })
       .getByRole('button', { name: 'S’entraîner' })
