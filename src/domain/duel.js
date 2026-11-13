@@ -46,6 +46,7 @@ export const AVATAR_OPTIONS = {
   ],
 };
 export const DEFAULT_AVATAR = {
+  kind: 'boy',
   name: 'Apprenti mage',
   skin: 'peach',
   hair: 'chestnut',
@@ -58,6 +59,7 @@ export const DEFAULT_AVATAR = {
 export function normalizeAvatar(input, xp = 0) {
   const avatar = { ...DEFAULT_AVATAR };
   if (!input || typeof input !== 'object') return avatar;
+  if (['boy', 'girl'].includes(input.kind)) avatar.kind = input.kind;
   if (typeof input.name === 'string')
     avatar.name =
       Array.from(input.name)

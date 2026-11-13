@@ -675,6 +675,11 @@ test('sauvegarde corrompue signalée, nouvelle partie disponible', async ({
   await expect(
     page.getByRole('status').filter({ hasText: /sauvegarde est illisible/ }),
   ).toBeVisible();
+  await page.getByRole('button', {name:'Commencer', exact:true}).click();
+  await page.locator('[data-kind=boy]').click();
+  await page.locator('#creation-continue').click();
+  await page.getByLabel('Ton nom de mage').fill('Mira');
+  await page.locator('#creation-continue').click();
   await ready(page, 'math');
   await solveMath(page);
   expect((await state(page)).xp).toBeGreaterThanOrEqual(20);

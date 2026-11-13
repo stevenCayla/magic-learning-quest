@@ -1,3 +1,4 @@
+import { freshOnboarding, restoreOnboarding } from './onboarding.js';
 import { freshAdventure, MAX_HEALTH } from './adventures.js';
 import { DEFAULT_AVATAR, normalizeAvatar } from './duel.js';
 import { DIFFICULTIES } from './exercises.js';
@@ -8,6 +9,7 @@ const stats = () => ({ correct: 0, wrong: 0, totalMs: 0, buckets: {} });
 export function freshState() {
   return {
     version: SAVE_VERSION,
+    onboarding: freshOnboarding(),
     xp: 0,
     unlocksXP: 0,
     score: 0,
@@ -145,6 +147,7 @@ export function restore(raw) {
     if (!natural(base.xp) || !natural(base.score)) throw new Error('Invalid aggregate');
     base.unlocksXP = Math.max(base.xp, natural(data.unlocksXP) ? data.unlocksXP : 0);
     base.avatar = normalizeAvatar(data.avatar, base.unlocksXP);
+    base.onboarding = restoreOnboarding(data.onboarding, base.unlocksXP);
     base.rewards = [
       ...new Set([
         ...base.legacyRewards,

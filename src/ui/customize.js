@@ -11,7 +11,17 @@ const labels = {
 };
 export function mountCustomizer(container, { getState, onChange }) {
   const { avatar, xp } = getState();
-  container.innerHTML = `<h2>✦ Personnalise ton mage</h2><div class="customizer-layout"><div class="mage-preview" aria-label="Aperçu de ton personnage">${wizardSVG({ avatar, prefix: 'preview' })}<strong id="preview-name">${escapeHTML(avatar.name)}</strong></div><div class="mage-options"><label class="mage-name">Ton nom de mage<input id="mage-name" maxlength="18" autocomplete="off" value="${escapeHTML(avatar.name)}"></label>${Object.entries(
+  container.innerHTML = `<h2>✦ Personnalise ton mage</h2><div class="customizer-layout"><div class="mage-preview" aria-label="Aperçu de ton personnage">${wizardSVG({ avatar, prefix: 'preview' })}<strong id="preview-name">${escapeHTML(avatar.name)}</strong></div><div class="mage-options"><fieldset><legend>Personnage</legend><div class="avatar-choices">${[
+    ['boy', 'Garçon'],
+    ['girl', 'Fille'],
+  ]
+    .map(
+      ([id, label]) =>
+        `<label class="avatar-choice"><input type="radio" name="avatar-kind" value="${id}" ${avatar.kind === id ? 'checked' : ''}><span>${label}</span></label>`,
+    )
+    .join(
+      '',
+    )}</div></fieldset><label class="mage-name">Ton nom de mage<input id="mage-name" maxlength="18" autocomplete="off" value="${escapeHTML(avatar.name)}"></label>${Object.entries(
     AVATAR_OPTIONS,
   )
     .map(
