@@ -40,7 +40,7 @@ export function mountOnboarding(container, { getState, change, complete, backHom
             .join(
               '',
             )}</div><div id="creation-panel" role="tabpanel" aria-labelledby="tab-${tab}">${tab === 'appearance' ? options('skin', 'Teint') + options('hair', 'Cheveux') + options('style', 'Coiffure') + options('face', 'Expression') : tab === 'outfit' ? options('robe', 'Tenue') + options('hat', 'Chapeau') : options('wand', 'Baguette')}</div></div></div>`
-    }<footer class="creation-footer"><p id="creation-error" role="status"></p><button id="creation-continue" class="arcade-menu-button clock-button">${choosing ? 'Continuer' : 'Commencer mon aventure'}</button>${versionMarkup()}</footer></section>`;
+    }<footer class="creation-footer"><p id="creation-error" role="status"></p><button id="creation-continue" class="arcade-menu-button clock-button">${choosing ? 'Continuer' : 'Commencer mon aventure'}</button>${versionMarkup()}</footer></section><section class="home-rotate creation-rotate" aria-label="Création en portrait"><div aria-hidden="true">▭ ↻ ▯</div><h2>Tourne ton téléphone à la verticale</h2><p>Crée ton mage en portrait.<br>Tes choix sont conservés.</p></section>`;
     container.querySelector('#creation-back').onclick = () => {
       if (choosing) backHome();
       else {

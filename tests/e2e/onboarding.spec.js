@@ -169,3 +169,25 @@ test('clavier iPhone : champ et validation restent visibles, navigation clavier 
   await page.keyboard.press('Enter');
   await expect(page.getByLabel('Ton nom de mage')).not.toBeFocused();
 });
+
+test('encoche iPhone et rotation : commandes visibles et brouillon conservé', async ({ page }) => {
+  await fresh(page);
+  await choose(page);
+  await page.getByLabel('Ton nom de mage').fill('Lina');
+  await page.getByLabel('Ton nom de mage').blur();
+  await page.addStyleTag({
+    content: '.creation-screen { padding-top:59px !important; padding-bottom:34px !important; }',
+  });
+  const button = await page.locator('#creation-continue').boundingBox();
+  expect(button.y + button.height).toBeLessThanOrEqual(844 - 34);
+  const title = await page.locator('.creation-header h1').boundingBox();
+  expect(title.y).toBeGreaterThanOrEqual(59);
+  await page.setViewportSize({ width: 844, height: 390 });
+  await expect(page.locator('.creation-rotate')).toBeVisible();
+  await expect(page.locator('.creation-screen')).toBeHidden();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(page.locator('.creation-rotate')).toBeHidden();
+  await expect(page.getByLabel('Ton nom de mage')).toHaveValue('Lina');
+  await page.locator('#creation-continue').click();
+  await expect(page.locator('#choose-clock')).toBeVisible();
+});
