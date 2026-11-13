@@ -7,7 +7,7 @@ import {
   ENEMIES,
   encounter,
   DuelClock,
-  COUNTDOWN_MS,
+  NEXT_MS,
   SPELL_MS,
 } from '../src/domain/duel.js';
 import { freshState, restore } from '../src/domain/storage.js';
@@ -56,39 +56,35 @@ test('énergie indépendante dans chaque aventure', () => {
   assert.equal(encounter(s.adventures.clock.xp).remaining, 100);
   assert.equal(encounter(s.adventures.math.xp).remaining, 75);
 });
-test('décompte exact 5,4,3,2,1 puis chrono de question, sans bonus de temps sur l’introduction', () => {
+test('le duel attend le joueur : aucun temps ne compte avant le départ', () => {
   const c = new DuelClock(100);
-  assert.equal(c.count, 5);
-  for (let i = 1; i <= 4; i++) {
-    c.step(100 + i * 1000);
-    assert.equal(c.count, 5 - i);
-    assert.equal(c.phase, 'countdown');
-    assert.equal(c.answerMs, 0);
-  }
-  c.step(5099);
-  assert.equal(c.count, 1);
-  c.step(5100);
-  assert.equal(c.phase, 'active');
+  assert.equal(c.phase, 'intro');
+  c.step(60000);
+  assert.equal(c.phase, 'intro');
   assert.equal(c.answerMs, 0);
-  c.step(5500);
+  c.begin(60000);
+  assert.equal(c.phase, 'active');
+  c.step(60400);
   assert.equal(c.answerMs, 400);
-  assert.equal(COUNTDOWN_MS, 5000);
+  c.begin(61000);
+  assert.equal(c.answerMs, 400);
+  assert.equal(NEXT_MS, 3000);
 });
-test('le décompte se suspend complètement en portrait ou en arrière-plan', () => {
+test('le chrono se suspend complètement en pause, en portrait ou en arrière-plan', () => {
   const c = new DuelClock(0);
+  c.begin(0);
   c.step(1000);
   c.step(2000, true);
   c.step(70000, true);
-  assert.equal(c.introMs, 1000);
-  assert.equal(c.answerMs, 0);
+  assert.equal(c.answerMs, 1000);
   c.step(80000, false);
-  assert.equal(c.introMs, 1000);
+  assert.equal(c.answerMs, 1000);
   c.step(81000, false);
-  assert.equal(c.introMs, 2000);
+  assert.equal(c.answerMs, 2000);
 });
 test('réponse et animation ont des temps indépendants, une interruption ne tue pas le duel', () => {
   const c = new DuelClock(0);
-  c.step(5000);
+  c.begin(5000);
   c.step(6200);
   assert.equal(c.answerMs, 1200);
   c.step(6300, true);
@@ -106,9 +102,9 @@ test('réponse et animation ont des temps indépendants, une interruption ne tue
   c.step(100300);
   assert.equal(c.spellMs, SPELL_MS);
 });
-test('réessai sans décompte, nouvelle étape avec décompte, temps monotone protégé', () => {
+test('question suivante sans défi, nouvel adversaire avec défi, temps monotone protégé', () => {
   const c = new DuelClock(0);
-  c.step(5000);
+  c.begin(5000);
   c.result(false, 5500);
   c.step(20000);
   assert.equal(c.phase, 'failure');
@@ -118,8 +114,7 @@ test('réessai sans décompte, nouvelle étape avec décompte, temps monotone pr
   c.step(19999);
   assert.equal(c.answerMs, 0);
   c.question(30000, true);
-  assert.equal(c.phase, 'countdown');
-  assert.equal(c.count, 5);
+  assert.equal(c.phase, 'intro');
 });
 test('personnalisation normalisée, accessoires verrouillés et débloqués', () => {
   assert.deepEqual(normalizeAvatar(null), DEFAULT_AVATAR);

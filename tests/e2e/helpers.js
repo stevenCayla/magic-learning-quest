@@ -74,8 +74,12 @@ async function ready(page, mode = 'clock') {
     })
     .click();
   await landscape(page);
-  await expect(page.locator('.battle-shell')).toHaveAttribute('data-phase', 'countdown');
-  await page.clock.runFor(5100);
+  await begin(page);
+}
+// Accepts the opponent's challenge shown before the first question of a duel.
+async function begin(page) {
+  await expect(page.locator('.battle-shell')).toHaveAttribute('data-phase', 'intro');
+  await page.getByRole('button', { name: 'COMMENCER LE DUEL' }).click();
   await expect(page.locator('.battle-shell')).toHaveAttribute('data-phase', 'active');
 }
 async function landscape(page) {
@@ -88,7 +92,7 @@ async function landscape(page) {
         await page.clock.runFor(50);
         return page.locator('.rotate-notice').isHidden();
       },
-      { message: 'La rotation doit être appliquée avant de démarrer le décompte' },
+      { message: 'La rotation doit être appliquée avant de lancer le duel' },
     )
     .toBe(true);
 }
@@ -105,11 +109,20 @@ async function solveMath(page) {
   await digits(page, op === '+' ? +a + +b : op === '−' ? +a - +b : +a * +b);
   await page.getByRole('button', { name: /Lancer mon sort/ }).click();
 }
+// Lets the spell land, then moves on without waiting for the automatic follow-up.
 async function finish(page) {
-  await page.clock.runFor(1850);
+  await page.clock.runFor(1050);
+  await page.locator('#feedback-next').click();
+}
+// After a wrong answer: reads the correction, then asks for another question.
+async function retry(page) {
+  await page.locator('#feedback-next').click();
+  await expect(page.locator('.battle-shell')).toHaveAttribute('data-phase', 'correction');
+  await page.locator('#panel-next').click();
 }
 async function menu(page) {
-  await page.getByRole('button', { name: 'Retour au menu', exact: true }).click();
+  await page.getByRole('button', { name: 'Pause', exact: true }).click();
+  await page.getByRole('button', { name: 'Quitter le duel' }).click();
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(page.locator('.home-rotate')).toBeHidden();
 }
@@ -123,6 +136,8 @@ async function settings(page) {
 export {
   boot,
   ready,
+  begin,
+  retry,
   digits,
   solveClock,
   solveMath,

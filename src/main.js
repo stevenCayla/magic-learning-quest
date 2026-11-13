@@ -6,9 +6,10 @@ import { openClockLesson } from './ui/clock-lesson.js';
 import { installZoomGuard } from './ui/zoom-guard.js';
 import { load, save } from './domain/storage.js';
 import { createBattleController } from './ui/battle/controller.js';
-import { mountCustomizer } from './ui/customize.js';
-import { normalizeAvatar } from './domain/duel.js';
+import { wizardSVG } from './ui/battle/characters.js';
+import { normalizeAvatar, AVATAR_OPTIONS } from './domain/duel.js';
 import './ui/battle/battle.css';
+import './ui/battle/arena-arcade.css';
 import './ui/adventures.css';
 import './ui/onboarding.css';
 import { mountOnboarding, installCreationViewport } from './ui/onboarding.js';
@@ -80,8 +81,8 @@ function navButton(id, icon, title) {
 }
 function shell(content) {
   document.documentElement.classList.toggle('home-screen', screen === 'home');
-  if (!state.onboarding.completed) {
-    app.innerHTML = `<div class="app-shell is-home onboarding-welcome"><main id="main" tabindex="-1">${warning ? `<p class="notice" role="status">${escape(warning)}</p>` : ''}${content}</main><div id="toast" role="status" class="toast"></div></div>`;
+  if (!state.onboarding.completed || screen === 'mage') {
+    app.innerHTML = `<div class="app-shell is-home onboarding-welcome ${screen === 'mage' ? 'is-editing-mage' : ''}"><main id="main" tabindex="-1">${warning ? `<p class="notice" role="status">${escape(warning)}</p>` : ''}${content}</main><div id="toast" role="status" class="toast"></div></div>`;
     return;
   }
   if (['clock', 'math'].includes(screen)) {
@@ -115,11 +116,6 @@ function home() {
         home();
         document.querySelector('#main').focus({ preventScroll: true });
       },
-      backHome: () => {
-        state = updateCreation(state, { step: 'welcome' });
-        persist();
-        home();
-      },
     });
     return;
   }
@@ -129,7 +125,7 @@ function home() {
     return `<button class="arcade-menu-button ${mode === 'clock' ? 'clock' : 'math'}-button" id="choose-${mode}"><span aria-hidden="true">${mode === 'clock' ? '◷' : '✦'}</span><span>${mode === 'clock' ? 'Horloge magique' : 'Maths magiques'}<small data-testid="${mode}-progress">${starsMarkup(j.stars)} · Niveau ${j.level}/20${j.complete ? ' · Maîtrise !' : ''}</small></span><span aria-hidden="true">➜</span></button>`;
   };
   shell(
-    `<section class="arcade-home" aria-label="Accueil de l’académie d’Astréa">${firstLaunch ? '' : '<button class="home-settings" id="home-settings" aria-label="Réglages" title="Réglages"><span aria-hidden="true">⚙</span></button>'}<header class="arcade-brand"><p>L’ACADÉMIE D’ASTRÉA</p><h1 aria-label="Magic Learning Quest"><span>MAGIC</span><span>QUEST</span></h1><p class="arcade-subtitle">Deux aventures. Trois étoiles chacune !</p></header><div class="arcade-heroes" role="img" aria-label="Un apprenti mage, une chouette et un petit dragon"></div><div class="arcade-home-bottom">${firstLaunch ? '<p class="welcome-promise">Ton aventure commence ici !</p><button class="arcade-menu-button clock-button welcome-start" id="begin-creation"><span aria-hidden="true">✦</span> Commencer</button>' : `<div class="arcade-home-progress"><span>🧙 ${escape(state.avatar.name)}</span><strong>À toi de jouer !</strong></div><div class="arcade-menu" aria-label="Choisis ton entraînement">${card('clock')}${card('math')}<button class="arcade-menu-button adventure-button" id="explore" aria-label="Explorer mes aventures"><span aria-hidden="true">♜</span><span>Mes aventures<small>Horloge et Maths : chacune son chemin</small></span><span aria-hidden="true">➜</span></button></div>`}${versionMarkup()}</div></section><section class="home-rotate" aria-label="Accueil en portrait"><div aria-hidden="true">▭ ↻ ▯</div><h2>Tourne ton téléphone à la verticale</h2><p>L’accueil se consulte en portrait.<br>Les duels se jouent en paysage.</p></section>`,
+    `<section class="arcade-home" aria-label="Accueil de l’académie d’Astréa">${firstLaunch ? '' : '<button class="home-settings" id="home-settings" aria-label="Réglages" title="Réglages"><span aria-hidden="true">⚙</span></button>'}<header class="arcade-brand"><p>ÉCOLE RONCHÈZE</p><h1 aria-label="Magic Learning Quest"><span>MAGIC</span><span>QUEST</span></h1><p class="arcade-subtitle">Deux aventures. Trois étoiles chacune !</p></header><div class="arcade-heroes" role="img" aria-label="Un apprenti mage, une chouette et un petit dragon"></div><div class="arcade-home-bottom">${firstLaunch ? '<p class="welcome-promise">Ton aventure commence ici !</p><button class="arcade-menu-button clock-button welcome-start" id="begin-creation"><svg aria-hidden="true" viewBox="0 0 44 44"><line x1="7" y1="38" x2="24" y2="21" stroke="#303023" stroke-width="8" stroke-linecap="round"/><line x1="7" y1="38" x2="24" y2="21" stroke="#c38b3f" stroke-width="4.5" stroke-linecap="round"/><polygon points="29,3 32.6,11.6 41.9,12.4 34.8,18.5 37,27.6 29,22.7 21,27.6 23.2,18.5 16.1,12.4 25.4,11.6" fill="#ffdc63" stroke="#303023" stroke-width="2.5" stroke-linejoin="round"/></svg> Commencer</button>' : `<div class="arcade-home-progress"><span>🧙 ${escape(state.avatar.name)}</span><strong>À toi de jouer !</strong></div><div class="arcade-menu" aria-label="Choisis ton entraînement">${card('clock')}${card('math')}<button class="arcade-menu-button adventure-button" id="explore" aria-label="Explorer mes aventures"><span aria-hidden="true">♜</span><span>Mes aventures<small>Horloge et Maths : chacune son chemin</small></span><span aria-hidden="true">➜</span></button></div>`}${versionMarkup()}</div></section><section class="home-rotate" aria-label="Accueil en portrait"><div aria-hidden="true">▭ ↻ ▯</div><h2>Tourne ton téléphone à la verticale</h2><p>L’accueil se consulte en portrait.<br>Les duels se jouent en paysage.</p></section>`,
   );
   if (firstLaunch) {
     document.querySelector('#begin-creation').onclick = () => {
@@ -179,7 +175,7 @@ function settings() {
     .sort((a, b) => b[1].wrong - a[1].wrong)
     .slice(0, 5);
   shell(
-    `<div class="page-heading"><div><p class="eyebrow">À TON RYTHME</p><h1>Réglages de l’académie<span class="gold">.</span></h1><p>Choisis un défi confortable. Tu peux changer à tout moment.</p></div></div><div class="settings-grid"><section class="glass settings-panel mage-customizer" id="mage-customizer"></section><section class="glass settings-panel" id="reset-adventures"></section><section class="glass settings-panel"><h2>✧ Difficulté des maths</h2><fieldset><legend>Choisis ton niveau</legend>${[
+    `<div class="page-heading"><div><p class="eyebrow">À TON RYTHME</p><h1>Réglages de l’académie<span class="gold">.</span></h1><p>Choisis un défi confortable. Tu peux changer à tout moment.</p></div></div><div class="settings-grid"><section class="mage-card" id="mage-card" aria-label="Ton mage"></section><section class="glass settings-panel" id="reset-adventures"></section><section class="glass settings-panel"><h2>✧ Difficulté des maths</h2><fieldset><legend>Choisis ton niveau</legend>${[
       [
         'auto',
         'Progression automatique',
@@ -229,16 +225,10 @@ function settings() {
         '',
       )}</div><p id="clock-stat-progression">Horloge : ${state.adventures.clock.xp} XP · ${journeyFor(state.adventures.clock.xp).stars}/3 étoiles · ${state.adventures.clock.score} points</p><p id="math-stat-progression">Maths : ${state.adventures.math.xp} XP · ${journeyFor(state.adventures.math.xp).stars}/3 étoiles · ${state.adventures.math.score} points</p><h3>Minutes à apprivoiser</h3><p>${errors.length ? errors.map(([k, v]) => `:${k.split(':')[1]} (${v.wrong} essai${v.wrong > 1 ? 's' : ''} à revoir)`).join(' · ') : 'Les difficultés apparaîtront ici après tes premiers essais.'}</p><button class="secondary" id="export">Exporter la sauvegarde</button></section><section class="glass settings-panel"><h2>Emporte ta magie</h2><label class="choice"><input type="checkbox" id="sound-enabled" ${state.settings.sound ? 'checked' : ''}><span><strong>Sons magiques</strong><small>Carillons de victoire et sons doux pour réessayer.</small></span></label><p>Installe Astréa sur ton écran d’accueil. Après une première ouverture en ligne, l’aventure fonctionne hors connexion.</p><button class="primary" data-install>＋ Installer l’application</button><p class="footnote">Sur iPhone ou iPad : dans Safari, touche Partager, puis « Sur l’écran d’accueil ». Sur Android ou ordinateur : utilise le bouton d’installation du navigateur.</p><p class="footnote">Ta progression reste sur cet appareil et ce navigateur. Aucune donnée n’est envoyée à un serveur.</p></section></div><p id="settings-status" class="footnote" role="status">Réglages enregistrés automatiquement.</p>`,
   );
-  mountCustomizer(document.querySelector('#mage-customizer'), {
-    getState: () => ({ ...state, xp: state.unlocksXP ?? state.xp }),
-    onChange: (key, value) => {
-      state.avatar = normalizeAvatar(
-        { ...state.avatar, [key]: value },
-        state.unlocksXP ?? state.xp,
-      );
-      persist();
-    },
-  });
+  const option = (key) => AVATAR_OPTIONS[key].find((o) => o[0] === state.avatar[key])?.[1] ?? '';
+  document.querySelector('#mage-card').innerHTML =
+    `<div class="mage-card-portrait" aria-hidden="true">${wizardSVG({ avatar: state.avatar, prefix: 'card' })}</div><div><p class="mage-card-eyebrow">TON MAGE</p><h2 id="mage-card-name">${escape(state.avatar.name)}</h2><p class="mage-card-summary">Tenue ${option('robe')} · Baguette ${option('wand')}</p><button class="arcade-menu-button adventure-button" id="edit-mage">Personnaliser</button></div>`;
+  document.querySelector('#edit-mage').onclick = () => navigate('mage');
   mountAdventureReset(document.querySelector('#reset-adventures'), {
     getState: () => state,
     onReset: (mode) => {
@@ -277,6 +267,23 @@ function settings() {
     URL.revokeObjectURL(url);
   };
 }
+function mage() {
+  shell('<div id="creation-root"></div>');
+  mountOnboarding(document.querySelector('#creation-root'), {
+    getState: () => state,
+    edit: {
+      avatar: () => state.avatar,
+      set: (key, value) => {
+        state.avatar = normalizeAvatar(
+          { ...state.avatar, [key]: value },
+          state.unlocksXP ?? state.xp,
+        );
+        persist();
+      },
+      done: () => navigate('settings'),
+    },
+  });
+}
 function navigate(next) {
   battle.stop();
   if (!state.onboarding.completed) {
@@ -285,7 +292,7 @@ function navigate(next) {
     return;
   }
   screen = next;
-  (({ home, adventure, settings, collection })[next] ?? home)();
+  (({ home, adventure, settings, collection, mage })[next] ?? home)();
   window.scrollTo(0, 0);
   document.querySelector('#main').focus({ preventScroll: true });
 }

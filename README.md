@@ -12,19 +12,19 @@ Le fond de l’accueil suit un dégradé continu de bleu clair vers le bleu fonc
 
 Le brouillon est sauvegardé à chaque choix : fermer ou recharger reprend l’étape en cours. **Commencer mon aventure** valide le personnage puis affiche Horloge, Maths et Mes aventures. L’initialisation ne réapparaît plus. Les réglages permettent ensuite de modifier le personnage et son nom. Les anciennes sauvegardes sans champ `onboarding` sont considérées comme déjà initialisées pour conserver le personnage et la progression existants. Réinitialiser les XP ne relance pas la création.
 
-Depuis l’accueil, choisir **Horloge magique** ou **Maths magiques**. Utiliser les grandes touches du pavé ou les chiffres du clavier, puis **Lancer mon sort**. Pour l’horloge, toucher le champ heures ou minutes pour le modifier. Le champ minutes s’active automatiquement après une heure complète ; une heure à un chiffre comme 1 peut être saisie `01` ou en touchant ensuite le champ minutes. `C` efface le champ actif, `⌫` retire son dernier chiffre. `Tab` permet de parcourir les commandes et `Entrée` active le bouton sélectionné. `Échap` revient au menu.
+Depuis l’accueil, choisir **Horloge magique** ou **Maths magiques**. Utiliser les grandes touches du pavé ou les chiffres du clavier, puis **Lancer mon sort**. Pour l’horloge, toucher le champ heures ou minutes pour le modifier. Le champ minutes s’active automatiquement après une heure complète ; une heure à un chiffre comme 1 peut être saisie `01` ou en touchant ensuite le champ minutes. `C` efface le champ actif, `⌫` retire son dernier chiffre. `Tab` permet de parcourir les commandes et `Entrée` active le bouton sélectionné. `Échap` met le duel en pause.
 
-Sur téléphone, les deux entraînements se jouent **en paysage**. En portrait, une invitation à tourner l’appareil suspend réellement l’épreuve ; le bouton de retour reste disponible. Safari/PWA sur iPhone ne garantissant pas le verrouillage logiciel de l’orientation, le jeu attend la rotation. Vérifier le verrouillage d’orientation du téléphone si nécessaire.
+Sur téléphone, les deux entraînements se jouent **en paysage**. En portrait, une invitation à tourner l’appareil suspend réellement l’épreuve ; le bouton de retour à l’accueil reste disponible. Safari/PWA sur iPhone ne garantissant pas le verrouillage logiciel de l’orientation, le jeu attend la rotation. Vérifier le verrouillage d’orientation du téléphone si nécessaire.
 
-Chaque entrée dans un duel et chaque nouvelle étape commencent par **5 → 4 → 3 → 2 → 1 → COMBAT !**, avec chiffres lumineux, anneaux d’énergie et sons originaux. Les questions sont masquées et le chrono pédagogique ne démarre qu’après ces cinq secondes. Il n’y a pas de nouveau décompte entre les questions du même combat ni lors d’un réessai.
+Chaque entrée dans un duel et chaque nouvel adversaire commencent par un **défi** : le nom de l’adversaire, le niveau et les trois règles du duel. Rien n’est chronométré tant que le joueur n’a pas touché **Commencer le duel**. Le bouton **Pause** arrête le chrono et propose de reprendre ou de quitter le duel ; la progression est enregistrée.
 
-Une bonne réponse affiche immédiatement Bravo, XP et points : le mage arme sa baguette, charge sa pointe et lance un projectile à traînée lumineuse vers l’adversaire. L’impact, les éclats et le son réduisent son énergie, puis l’exercice suivant arrive automatiquement après la séquence de **1,8 seconde**. Une erreur ou une expiration conserve les XP, affiche immédiatement la correction puis anime la baguette, le projectile et l’impact du **sorcier adverse vers le joueur**, avec un son distinct ; après cette riposte de 1,8 seconde, **Recommencer** réessaie la même question sans refaire l’introduction. Le mode découverte désactive le chrono pédagogique et les bonus de rapidité, tout en conservant le décompte de présentation.
+Une bonne réponse affiche immédiatement Bravo, XP et points : le mage prend sa pose de lancer et envoie un projectile à traînée lumineuse vers l’adversaire, qui encaisse le coup. La question suivante arrive après **3 secondes**, ou tout de suite avec **Continuer**. Une erreur ou une expiration conserve les XP et déclenche la riposte de l’adversaire ; **Voir la correction** ouvre alors « Regardons ensemble » : la réponse donnée, la bonne réponse et le raisonnement en trois étapes, puis une **nouvelle question**. Quand l’adversaire est vaincu, l’écran **Victoire** récapitule le duel (duel gagné, une erreur au plus, trois sorts éclair) avant le niveau suivant. Le mode découverte désactive le chrono pédagogique et les bonus de rapidité.
 
 Chaque aventure possède sa propre **jauge de vie de 100 PV**, visible au-dessus du joueur. Une erreur ou une expiration coûte **25 PV**, retirés visuellement à l’impact du sort adverse. La vie reste diminuée entre deux questions et est sauvegardée, y compris à zéro. Une réussite dans le même niveau ne guérit pas ; vaincre l’adversaire et passer au niveau suivant redonne 100 PV.
 
-À **0 PV**, le duel est perdu. Après la riposte complète, **Recommencer le niveau** rétablit la vie et l’adversaire, relance le décompte de cinq secondes et efface uniquement les XP et la maîtrise gagnés dans ce niveau non terminé. Les niveaux terminés, étoiles, trésors, points, statistiques et l’autre aventure sont conservés. Quitter ou recharger ne contourne pas cette défaite.
+À **0 PV**, le duel est perdu : après la correction, l’écran de défaite propose de relire la leçon et de **Rejouer**. Rejouer rend les 100 PV et ne retire rien : les XP déjà gagnés dans le niveau, les niveaux terminés, étoiles, trésors, points, statistiques et l’autre aventure sont conservés. Quitter ou recharger ne contourne pas cette défaite.
 
-Le décompte, le chrono et la transition sont suspendus en portrait ou en arrière-plan. Quitter l’épreuve annule les effets et transitions. Les effets et sons sont entièrement originaux : l’inspiration arcade ne reprend aucun asset ni son de Sky Force Reloaded.
+Le chrono et les animations de sort sont suspendus en pause, en portrait ou en arrière-plan. Quitter l’épreuve annule les effets et transitions. Le mage du joueur, les vingt adversaires et les vingt décors sont dessinés dans le même style, avec trois poses par personnage (attente, sort, touché) ; le mage reprend tous les choix de la personnalisation. Les effets et sons sont entièrement originaux : l’inspiration arcade ne reprend aucun asset ni son de Sky Force Reloaded.
 
 Dans **Mes aventures**, choisir Horloge ou Maths : XP, score, séries, coffres et position sont propres à l’aventure choisie. Il faut terminer les **20 niveaux (2 000 XP)** pour vaincre le dragon, délivrer Aélis et gagner une étoile. L’aventure repart alors au niveau 1 avec une difficulté accrue. Les étoiles se gagnent à **2 000, 4 000 et 6 000 XP**, séparément pour chaque activité. Après trois étoiles, l’entraînement peut continuer au dernier niveau sans quatrième étoile.
 
@@ -46,18 +46,20 @@ src/
   ui/battle/
     controller.js   # Phases, saisie, interruptions et déclenchement des effets
     view.js         # Composition de l’arène
-    characters.js   # Mages, dragon et princesse en SVG originaux
+    characters.js   # Apparence du joueur et des adversaires, princesse
+    mage-art.js     # Mage articulé en trois poses, commun à la création et au combat
+    mage-parts.js   # Chapeaux, traits de visage et pointes de baguette
+    dragon-art.js   # Dragon des deux derniers niveaux, trois poses
     scenes.js       # 20 décors en lien avec les étapes
     battle.css      # Arène paysage, animation de baguette, vol et impact
+    arena-arcade.css # Habillage arcade, panneaux du duel et poses
   ui/clock-lesson.js # Leçon illustrée et horloge manipulable
   ui/adventure-settings.js # Confirmation de remise à zéro ciblée
   ui/zoom-guard.js  # Gestes de zoom et raccourcis
   build/version.js # Version dérivée du tag de release, testable sans GitHub
   ui/onboarding.js # Choix, personnalisation et gestion du clavier mobile
   ui/onboarding.css # Décor commun, cartes et contrôles tactiles
-  ui/player-mage.js # Personnage SVG commun à la création et au combat
   ui/version.js    # Numéro de version embarqué, disponible offline
-  ui/customize.js   # Choix du personnage et aperçu
   ui/sound.js       # Carillons Web Audio originaux, utilisables hors connexion
   ui/clock.js       # Rendu SVG de l’horloge (position réelle des deux aiguilles)
   main.js           # Accueil, navigation, réglages, personnalisation et installation
